@@ -8,26 +8,12 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
-/**
- * Implements hook_form_alter().
- */
-function paragraphs_paste_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  \Drupal::service('class_resolver')
-    ->getInstanceFromDefinition(ParagraphsPasteForm::class)
-    ->formAlter($form, $form_state, $form_id);
-}
 
 /**
  * Implements hook_field_widget_multivalue_form_alter().
  */
 function paragraphs_paste_field_widget_multivalue_paragraphs_form_alter(array &$elements, FormStateInterface $form_state, array $context) {
-  $x = 1;
-}
-
-/**
- * Implements hook_field_widget_paragraphs_form_alter().
- */
-function paragraphs_paste_field_widget_paragraphs_form_alter(array &$elements, FormStateInterface $form_state, array $context) {
-  $x = 1;
-
+  \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(ParagraphsPasteForm::class)
+    ->formAlter($elements, $form_state, $context);
 }

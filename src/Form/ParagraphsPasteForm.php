@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -58,66 +59,64 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   /**
    * Alter the entity form to add access unpublished elements.
    */
-  public function formAlter(&$form, FormStateInterface $form_state) {
+  public function formAlter(&$elements, FormStateInterface $form_state, array $context) {
 
     if (!$form_state->getFormObject() instanceof EntityForm) {
       return;
     }
 
     /** @var \Drupal\Core\Entity\Entity $entity */
-    $entity = $form_state->getFormObject()->getEntity();
+    // $entity = $form_state->getFormObject()->getEntity();
+    $fieldWrapperId = Html::getId(implode('-', array_merge($context['form']['#parents'], [$elements['#field_name']])) . '-add-more-wrapper');
+    // 0 = "field_paragraphs", 1 = "widget",
+    // 2 = "add_more", 3 = "add_more_button_text".
+    // $triggering_parents = $elements['#array_parents'];.
+    // Check config #field_name.
+    $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
+    $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
 
-    $field_name = 'field_paragraphs';
+    // Move children to table header and remove $elements['paragraphs_paste'],
+    // see paragraphs_preprocess_field_multiple_value_form().
+    $elements['paragraphs_paste']['#paragraphs_header'] = TRUE;
 
-    if ($entity->bundle() === 'article' && isset($form[$field_name])) {
-      // Enable for field_paragraphs.
-      $form[$field_name]['#attributes']['data-paragraphs-paste'] = 'enabled';
-      $form['paragraphs_paste'] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'class' => 'visually-hidden',
-          'id' => 'edit-paragraphs-paste',
-        ],
-        '#attached' => [
-          'library' => [
-            'paragraphs_paste/init',
-          ],
-        ],
-      ];
+    $elements['paragraphs_paste']['paste_content'] = [
+      '#type' => 'hidden',
+      '#attributes' => [
+        'class' => ['visually-hidden'],
+      ],
+    ];
 
-      $form['paragraphs_paste']['content'] = [
-        '#type' => 'hidden',
-      ];
-
-      $form['paragraphs_paste']['button'] = [
-        '#type' => 'submit',
-        '#value' => t('Paste'),
-        '#submit' => [[get_class($this), 'pasteSubmit']],
-        '#ajax' => [
-          'callback' => [get_class($this), 'pasteAjax'],
-          'wrapper' => $form[$field_name]['widget']['add_more']['add_more_button_text']['#ajax']['wrapper'],
-        ],
-        '#limit_validation_errors' => [['paragraphs_paste']],
-        // '#limit_validation_errors' => [array_merge($this->fieldParents, [$this->fieldDefinition->getName(), 'add_more'])],.
-      ];
-
-    }
+    $elements['paragraphs_paste']['paste_action'] = [
+      '#type' => 'submit',
+      '#value' => t('Paste'),
+      '#submit' => [[get_class($this), 'pasteSubmit']],
+      '#attributes' => [
+        'class' => ['visually-hidden'],
+        'data-paragraphs-paste' => 'enabled',
+      ],
+      '#ajax' => [
+        'callback' => [get_class($this), 'pasteAjax'],
+        'wrapper' => $fieldWrapperId,
+      ],
+      '#limit_validation_errors' => [['paragraphs_paste']],
+    ];
   }
 
   /**
    * Submit allback.
    */
   public static function pasteSubmit(array $form, FormStateInterface $form_state) {
-    $button = $form_state->getTriggeringElement();
+    $submit['button'] = $form_state->getTriggeringElement();
 
-    // Fake submit.
-    $button['#array_parents'] = [
-      'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
-    ];
-    $form_state->setTriggeringElement($button);
+    // 'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
+    // $form_state->setTriggeringElement($button);
+    // $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);.
+    // Mimic ParagraphsWidget::getSubmitElementInfo().
+    $submit['element'] = NestedArray::getValue($form, array_slice($submit['button']['#array_parents'], 2, 0));
+    $submit['field_name'] = $submit['element']['#field_name'];
+    $submit['parents'] = $submit['element']['#field_parents'];
 
-    $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
-
+    $submit['widget_state'] = ParagraphsWidget::getWidgetState($submit['parents'], $submit['field_name'], $form_state);
     // $submit['widget_state']['selected_bundle'] = 'text';.
     $submit['widget_state']['items_count']++;
     $submit['widget_state']['real_items_count']++;
@@ -141,7 +140,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       'mode' => 'edit',
     ];
 
-    $field_state['items_count'];
     ParagraphsWidget::setWidgetState($submit['parents'], $submit['field_name'], $form_state, $submit['widget_state']);
 
     $form_state->setRebuild();
@@ -155,9 +153,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $button = $form_state->getTriggeringElement();
 
     // Fake submit.
-    $button['#array_parents'] = [
-      'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
-    ];
+    //    $button['#array_parents'] = [
+    //      'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
+    //    ];.
     $form_state->setTriggeringElement($button);
 
     $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);

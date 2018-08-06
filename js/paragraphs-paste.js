@@ -24,11 +24,19 @@
     pastedData = clipboardData.getData('Text').split("\n");
 
     // var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    // https://twitter.com/ben_r/status/102084133pasteButton3596884992
+    var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
+    var $pasteButton = $('[data-drupal-selector="' + pasteTarget + '"]');
 
-    // https://twitter.com/ben_r/status/1020841333596884992
-    var $pasteField = $('[data-drupal-selector="edit-paragraphs-paste"]');
-    $pasteField.find('[data-drupal-selector="edit-content"]').val(pastedData);
-    $pasteField.find('[data-drupal-selector="edit-button"]').trigger('mousedown');
+    $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);
+    $pasteButton.trigger('mousedown');
+  };
+
+  let detectYoutube = function(content) {
+    // http://youtu.be/yz7tmJ2QBdw
+    // youtube.com/watch?v=v9VlleQPW2A&index=3&list=PL7xqy2B8uXNI-uKDix02rQRIgy9Y_lM6-
+    let regexp = "(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\s]+)(?:\S+)?";
+
   };
 
     /**
@@ -36,15 +44,34 @@
    */
   Drupal.behaviors.paragraphsPasteAction = {
     attach: function (context, settings) {
-      var textarea = '<div class="paragraphs-paste-action" contenteditable="true"><div class="paragraphs-paste-message"><p>Paste here.</p></div></div>';
-      // @todo test multiple fields.
-      var $wrappers = $('[data-paragraphs-paste="enabled"]', context).closest('.paragraphs-container').once('paragraphsPaste');
-      $wrappers.each(function() {
-        $(this).find('> .fieldset-wrapper').prepend(textarea);
+      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
+      $buttons.each(function( ) {
+        var $this = $(this);
+        var $wrapper = $this.closest('.paragraphs-container').once('paragraphsPaste');
+
+        $wrapper.find('> .fieldset-wrapper').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
+        $wrapper.find('.paragraphs-paste-action').on('paste', pasteHandler);
       });
-      $wrappers.find('.paragraphs-paste-action')
-        .on('paste', pasteHandler);
+
     }
   };
+
+  /**
+   * Theme function for remove button
+   *
+   * @param {object} options
+   *   Options for delete confirmation button.
+   *
+   * @return {string}
+   *   Returns markup.
+   */
+  Drupal.theme.paragraphsPasteActionArea = function (options) {
+    return '<div class="paragraphs-paste-action" data-paragraphs-paste-target="' + options.target + '" contenteditable="true">' +
+      '<div class="paragraphs-paste-message">' +
+        '<p>' + Drupal.t('Paste here.') + '</p>' +
+        '</div>' +
+      '</div>';
+  };
+
 
 })(jQuery, Drupal);
