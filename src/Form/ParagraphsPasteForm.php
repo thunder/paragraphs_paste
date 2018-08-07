@@ -2,10 +2,11 @@
 
 namespace Drupal\paragraphs_paste\Form;
 
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -61,26 +62,21 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    */
   public function formAlter(&$elements, FormStateInterface $form_state, array $context) {
 
-    if (!$form_state->getFormObject() instanceof EntityForm) {
+    if ($elements['#cardinality'] !== FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED || $form_state->isProgrammed()) {
       return;
     }
-
-    /** @var \Drupal\Core\Entity\Entity $entity */
-    // $entity = $form_state->getFormObject()->getEntity();
+    // Construct wrapper id.
     $fieldWrapperId = Html::getId(implode('-', array_merge($context['form']['#parents'], [$elements['#field_name']])) . '-add-more-wrapper');
-    // 0 = "field_paragraphs", 1 = "widget",
-    // 2 = "add_more", 3 = "add_more_button_text".
-    // $triggering_parents = $elements['#array_parents'];.
-    // Check config #field_name.
+
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
     $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
-    $elements['paragraphs_paste']['#paragraphs_header'] = TRUE;
+    $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
 
     $elements['paragraphs_paste']['paste_content'] = [
-      '#type' => 'hidden',
+      '#type' => 'textfield',
       '#attributes' => [
         'class' => ['visually-hidden'],
       ],
@@ -95,7 +91,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         'data-paragraphs-paste' => 'enabled',
       ],
       '#ajax' => [
-        'callback' => [get_class($this), 'pasteAjax'],
+        'callback' => [ParagraphsWidget::class, 'addMoreAjax'],
         'wrapper' => $fieldWrapperId,
       ],
       '#limit_validation_errors' => [['paragraphs_paste']],
@@ -103,23 +99,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   }
 
   /**
-   * Submit allback.
+   * Submit callback.
    */
   public static function pasteSubmit(array $form, FormStateInterface $form_state) {
-    $submit['button'] = $form_state->getTriggeringElement();
-
-    // 'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
-    // $form_state->setTriggeringElement($button);
-    // $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);.
-    // Mimic ParagraphsWidget::getSubmitElementInfo().
-    $submit['element'] = NestedArray::getValue($form, array_slice($submit['button']['#array_parents'], 2, 0));
-    $submit['field_name'] = $submit['element']['#field_name'];
-    $submit['parents'] = $submit['element']['#field_parents'];
-
-    $submit['widget_state'] = ParagraphsWidget::getWidgetState($submit['parents'], $submit['field_name'], $form_state);
-    // $submit['widget_state']['selected_bundle'] = 'text';.
-    $submit['widget_state']['items_count']++;
-    $submit['widget_state']['real_items_count']++;
+    $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
 
     $host = $form_state->getFormObject()->getEntity();
     $field_name = 'field_paragraphs';
@@ -129,44 +112,32 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $entity_type = $entity_type_manager->getDefinition($target_type);
     $bundle_key = $entity_type->getKey('bundle');
 
-    $paragraphs_entity = $entity_type_manager->getStorage($target_type)->create([
-      $bundle_key => 'text',
-    ]);
-    $paragraphs_entity->setParentEntity($host, $field_name);
-    $submit['widget_state']['paragraphs'][] = [
-      'entity' => $paragraphs_entity,
-    // $display = EntityFormDisplay::collectRenderDisplay($paragraphs_entity, $this->getSetting('form_display_mode'));.
-      'display' => 'default',
-      'mode' => 'edit',
-    ];
+    for ($i = 0; $i < 2; $i++) {
+      /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
+      $paragraph_entity = $entity_type_manager->getStorage($target_type)
+        ->create([
+          $bundle_key => 'text',
+        ]);
+      $input = NestedArray::getValue(
+        $form_state->getUserInput(),
+        array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
+      );
+
+      $paragraph_entity->setParentEntity($host, $field_name);
+      $paragraph_entity->set('field_text', $input);
+
+      $submit['widget_state']['paragraphs'][] = [
+        'entity' => $paragraph_entity,
+        // $display = EntityFormDisplay::collectRenderDisplay($paragraphs_entity, $this->getSetting('form_display_mode'));.
+        'display' => 'default',
+        'mode' => 'edit',
+      ];
+      $submit['widget_state']['real_items_count']++;
+      $submit['widget_state']['items_count']++;
+    }
 
     ParagraphsWidget::setWidgetState($submit['parents'], $submit['field_name'], $form_state, $submit['widget_state']);
-
     $form_state->setRebuild();
-
-  }
-
-  /**
-   * Ajax callback..
-   */
-  public static function pasteAjax(array &$form, FormStateInterface $form_state) {
-    $button = $form_state->getTriggeringElement();
-
-    // Fake submit.
-    //    $button['#array_parents'] = [
-    //      'field_paragraphs', 'widget', 'add_more', 'add_more_button_text',
-    //    ];.
-    $form_state->setTriggeringElement($button);
-
-    $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
-    $element = $submit['element'];
-
-    // Add a DIV around the delta receiving the Ajax effect.
-    $delta = $submit['element']['#max_delta'];
-    $element[$delta]['#prefix'] = '<div class="ajax-new-content">' . (isset($element[$delta]['#prefix']) ? $element[$delta]['#prefix'] : '');
-    $element[$delta]['#suffix'] = (isset($element[$delta]['#suffix']) ? $element[$delta]['#suffix'] : '') . '</div>';
-
-    return $element;
   }
 
 }

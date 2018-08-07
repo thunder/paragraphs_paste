@@ -13,7 +13,6 @@
    *   click event
    */
   var pasteHandler = function(event) {
-
     var clipboardData, pastedData;
 
     event.stopPropagation();
@@ -23,13 +22,9 @@
     clipboardData = event.originalEvent.clipboardData || window.clipboardData;
     pastedData = clipboardData.getData('Text').split("\n");
 
-    // var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    // https://twitter.com/ben_r/status/102084133pasteButton3596884992
     var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
-    var $pasteButton = $('[data-drupal-selector="' + pasteTarget + '"]');
-
     $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);
-    $pasteButton.trigger('mousedown');
+    $('[data-drupal-selector="' + pasteTarget + '"]').trigger('mousedown');
   };
 
   let detectYoutube = function(content) {
@@ -37,23 +32,6 @@
     // youtube.com/watch?v=v9VlleQPW2A&index=3&list=PL7xqy2B8uXNI-uKDix02rQRIgy9Y_lM6-
     let regexp = "(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\s]+)(?:\S+)?";
 
-  };
-
-    /**
-   * Process paragraph_AddAboveButton elements.
-   */
-  Drupal.behaviors.paragraphsPasteAction = {
-    attach: function (context, settings) {
-      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
-      $buttons.each(function( ) {
-        var $this = $(this);
-        var $wrapper = $this.closest('.paragraphs-container').once('paragraphsPaste');
-
-        $wrapper.find('> .fieldset-wrapper').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
-        $wrapper.find('.paragraphs-paste-action').on('paste', pasteHandler);
-      });
-
-    }
   };
 
   /**
@@ -73,5 +51,21 @@
       '</div>';
   };
 
+  /**
+   * Process paragraph_AddAboveButton elements.
+   */
+  Drupal.behaviors.paragraphsPasteAction = {
+    attach: function (context, settings) {
+      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
+      $buttons.each(function( ) {
+        var $this = $(this);
+        var $wrapper = $this.closest('.paragraphs-container').once('paragraphsPaste');
+
+        $wrapper.find('> .fieldset-wrapper').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
+        $wrapper.find('.paragraphs-paste-action').on('paste', pasteHandler);
+      });
+
+    }
+  };
 
 })(jQuery, Drupal);
