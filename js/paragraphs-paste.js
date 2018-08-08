@@ -20,7 +20,8 @@
 
     // Get pasted data via clipboard API
     clipboardData = event.originalEvent.clipboardData || window.clipboardData;
-    pastedData = clipboardData.getData('Text').split("\n");
+    // TODO: Sanitize and quantify pasted data.
+    pastedData = JSON.stringify(clipboardData.getData('Text').split("\n\n"));
 
     var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
     $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);

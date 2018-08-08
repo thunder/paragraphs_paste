@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
+use Drupal\paragraphs_paste\ParagraphsPastePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,6 +29,13 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   protected $entityTypeManager;
 
   /**
+   * The ParagraphsPaste plugin manager.
+   *
+   * @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager
+   */
+  protected $pluginManager;
+
+  /**
    * Config.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -39,11 +47,14 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager service.
+   * @param \Drupal\paragraphs_paste\ParagraphsPastePluginManager $pluginManager
+   *   The ParagraphsPaste plugin manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   Config factory service.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ParagraphsPastePluginManager $pluginManager, ConfigFactoryInterface $configFactory) {
     $this->entityTypeManager = $entityTypeManager;
+    $this->pluginManager = $pluginManager;
     $this->config = $configFactory->get('paragraphs_paste.settings');
   }
 
@@ -53,6 +64,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
+      $container->get('plugin.manager.paragraphs_paste.plugin'),
       $container->get('config.factory')
     );
   }
@@ -76,7 +88,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
 
     $elements['paragraphs_paste']['paste_content'] = [
-      '#type' => 'textfield',
+      '#type' => 'hidden',
       '#attributes' => [
         'class' => ['visually-hidden'],
       ],
@@ -103,29 +115,23 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    */
   public static function pasteSubmit(array $form, FormStateInterface $form_state) {
     $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
-
     $host = $form_state->getFormObject()->getEntity();
-    $field_name = 'field_paragraphs';
-    $target_type = 'paragraph';
 
-    $entity_type_manager = \Drupal::entityTypeManager();
-    $entity_type = $entity_type_manager->getDefinition($target_type);
-    $bundle_key = $entity_type->getKey('bundle');
-
-    for ($i = 0; $i < 2; $i++) {
-      /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
-      $paragraph_entity = $entity_type_manager->getStorage($target_type)
-        ->create([
-          $bundle_key => 'text',
-        ]);
-      $input = NestedArray::getValue(
+    $values = json_decode(
+      NestedArray::getValue(
         $form_state->getUserInput(),
         array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
-      );
+      )
+    );
+    /* @var ParagraphsPastePluginManager $plugin_manager */
+    $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
 
-      $paragraph_entity->setParentEntity($host, $field_name);
-      $paragraph_entity->set('field_text', $input);
+    foreach ($values as $value) {
+      $plugin = $plugin_manager->getPluginFromInput($value);
 
+      $paragraph_entity = $plugin->build($value);
+      /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
+      $paragraph_entity->setParentEntity($host, $submit['field_name']);
       $submit['widget_state']['paragraphs'][] = [
         'entity' => $paragraph_entity,
         // $display = EntityFormDisplay::collectRenderDisplay($paragraphs_entity, $this->getSetting('form_display_mode'));.
