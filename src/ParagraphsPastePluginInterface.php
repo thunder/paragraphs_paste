@@ -8,6 +8,7 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
  * Defines an interface for ParagraphsPaste plugins.
  *
  * @see \Drupal\paragraphs_paste\Annotation\ParagraphsPastePlugin
+ * @see \Drupal\paragraphs_paste\ParagraphsPastePluginBase
  * @see \Drupal\paragraphs_paste\ParagraphsPastePluginInterface
  * @see \Drupal\paragraphs_paste\ParagraphsPastePluginManager
  * @see plugin_api

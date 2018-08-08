@@ -5,16 +5,16 @@ namespace Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
 
 /**
- * Defines the "text" plugin.
+ * Defines the "video" plugin.
  *
  * @ParagraphsPastePlugin(
- *   id = "text",
- *   label = @Translation("Text"),
+ *   id = "video",
+ *   label = @Translation("Video"),
  *   module = "paragraphs_paste",
- *   weight = -1
+ *   weight = 0
  * )
  */
-class Text extends ParagraphsPastePluginBase {
+class Video extends ParagraphsPastePluginBase {
 
   /**
    * {@inheritdoc}

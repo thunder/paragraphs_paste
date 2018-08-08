@@ -2,14 +2,16 @@
 
 namespace Drupal\paragraphs_paste;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Provides a ParagraphsPaste Plugin plugin manager.
  *
  * @see \Drupal\paragraphs_paste\Annotation\ParagraphsPastePlugin
+ * @see \Drupal\paragraphs_paste\ParagraphsPastePluginBase
  * @see \Drupal\paragraphs_paste\ParagraphsPastePluginInterface
  * @see \Drupal\paragraphs_paste\ParagraphsPastePluginManager
  * @see plugin_api
@@ -55,7 +57,8 @@ class ParagraphsPastePluginManager extends DefaultPluginManager {
         $candidates[] = $definition;
       }
     }
-    // @todo sort definitions / candidates by weight.
+    // Sort definitions / candidates by weight.
+    uasort($candidates, [SortArray::class, 'sortByWeightElement']);
     if (!empty($candidates)) {
       return $this->createInstance(end($candidates)['id']);
     }
