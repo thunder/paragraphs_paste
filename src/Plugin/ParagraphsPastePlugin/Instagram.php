@@ -48,8 +48,7 @@ class Instagram extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input) {
     $regex = '/(?:https?:\/\/)?(?:www\.)?instagram\.com\/p\/\w+\/?/';
-    $return = preg_match($regex, $input);
-    return $return;
+    return preg_match($regex, $input);
   }
 
 }

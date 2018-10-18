@@ -47,9 +47,9 @@ class Video extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   public static function isApplicable($input) {
-    $regex = '/(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))[^&\s]+(?:\S+)?/';
-    $return = preg_match($regex, $input);
-    return $return;
+    // Only youtube and vimeo are currently supported.
+    $regex = '/(?:https?:\/\/)?(?:www\.)?(?:vimeo\.com\/\w+\/?)|(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))[^&\s]+(?:\S+)?/';
+    return preg_match($regex, $input);
   }
 
 }

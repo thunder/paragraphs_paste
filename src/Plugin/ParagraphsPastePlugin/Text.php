@@ -39,6 +39,7 @@ class Text extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   public static function isApplicable($input) {
+    // Catch all content.
     return TRUE;
   }
 

@@ -48,8 +48,7 @@ class Twitter extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input) {
     $regex = '/(?:http:\/\/)?(?:www\.)?twitter\.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[\w\-]*\/)*([\w\-]*)/';
-    $return = preg_match($regex, $input);
-    return $return;
+    return preg_match($regex, $input);
   }
 
 }
