@@ -8,7 +8,6 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
-
 /**
  * Implements hook_field_widget_multivalue_form_alter().
  */
@@ -23,7 +22,7 @@ function paragraphs_paste_field_widget_multivalue_paragraphs_form_alter(array &$
  */
 function paragraphs_paste_preprocess_field_multiple_value_form(&$variables) {
   if (!empty($variables['table']['#header']) && isset($variables['table']['#rows'])) {
-    // Find paragraphs_paste  and move to header.
+    // Find paragraphs_paste key and move to header.
     // @see template_preprocess_field_multiple_value_form()
     foreach ($variables['table']['#rows'] as $key => $row) {
       if (!empty($row['data'][1]['data']['#paragraphs_paste'])) {

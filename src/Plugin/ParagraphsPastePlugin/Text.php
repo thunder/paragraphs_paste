@@ -21,14 +21,15 @@ class Text extends ParagraphsPastePluginBase {
    */
   public function build($input) {
     $target_type = 'paragraph';
+    $bundle = 'text';
 
     $entity_type = $this->entityTypeManager->getDefinition($target_type);
-    $bundle_key = $entity_type->getKey('bundle');
 
     $paragraph_entity = $this->entityTypeManager->getStorage($target_type)
       ->create([
-        $bundle_key => 'text',
+        $entity_type->getKey('bundle') => $bundle,
       ]);
+
     $paragraph_entity->set('field_text', $input);
 
     return $paragraph_entity;

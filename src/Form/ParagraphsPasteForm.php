@@ -130,11 +130,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       $plugin = $plugin_manager->getPluginFromInput($value);
 
       $paragraph_entity = $plugin->build($value);
-      /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
+      /* @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
       $paragraph_entity->setParentEntity($host, $submit['field_name']);
       $submit['widget_state']['paragraphs'][] = [
         'entity' => $paragraph_entity,
-        // $display = EntityFormDisplay::collectRenderDisplay($paragraphs_entity, $this->getSetting('form_display_mode'));.
         'display' => 'default',
         'mode' => 'edit',
       ];

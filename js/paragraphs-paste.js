@@ -21,18 +21,11 @@
     // Get pasted data via clipboard API
     clipboardData = event.originalEvent.clipboardData || window.clipboardData;
     // TODO: Sanitize and quantify pasted data.
-    pastedData = JSON.stringify(clipboardData.getData('Text').split("\n\n"));
+    pastedData = JSON.stringify(clipboardData.getData('Text').split(/\n\s?\n/));
 
     var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
     $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);
     $('[data-drupal-selector="' + pasteTarget + '"]').trigger('mousedown');
-  };
-
-  let detectYoutube = function(content) {
-    // http://youtu.be/yz7tmJ2QBdw
-    // youtube.com/watch?v=v9VlleQPW2A&index=3&list=PL7xqy2B8uXNI-uKDix02rQRIgy9Y_lM6-
-    let regexp = "(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\s]+)(?:\S+)?";
-
   };
 
   /**
