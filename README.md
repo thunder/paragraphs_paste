@@ -1,5 +1,4 @@
 # [Work in Progress] 
 
-# Custom List
-
-The paragraphs_paste module provides a way to create multiple paragraph entities by pasting content.
+# paragraphs-paste
+A drupal module for creating multiple paragraph entities by pasting content.
