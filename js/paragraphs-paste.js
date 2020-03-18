@@ -52,9 +52,9 @@
       var $buttons = $('[data-paragraphs-paste="enabled"]', context);
       $buttons.each(function () {
         var $this = $(this);
-        var $wrapper = $this.closest('.paragraphs-container').once('paragraphsPaste');
+        var $wrapper = $this.closest('.form-wrapper').once('paragraphsPaste');
 
-        $wrapper.find('> .fieldset-wrapper').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
+        $wrapper.find('> div').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
         $wrapper.find('.paragraphs-paste-action')
           .on('paste', pasteHandler)
           .on('mousedown', function () { $(this).attr('contenteditable', true); });
