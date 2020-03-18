@@ -10,6 +10,7 @@
     }
   ],
   "require": {
+    "ext-json": "*",
     "drupal/paragraphs": "^1.10"
   }
 }
