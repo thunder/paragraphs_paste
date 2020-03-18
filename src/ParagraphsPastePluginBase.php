@@ -118,7 +118,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
 
     $path = array_shift($property_path);
 
-    [$fieldName, $bundle] = array_pad(explode(':', $path), 2, NULL);
+    list($fieldName, $bundle) = array_pad(explode(':', $path), 2, NULL);
 
     if (empty($fields[$fieldName])) {
       return;
