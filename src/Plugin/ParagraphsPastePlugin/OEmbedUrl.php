@@ -13,41 +13,11 @@ use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
  *   module = "paragraphs_paste",
  *   weight = 0,
  *   providers = {},
- *   media_bundle = "",
- *   media_bundle_field = "",
- *   paragraph_bundle = "",
- *   paragraph_bundle_field = "",
+ *   property_path= "",
  *   deriver = "\Drupal\paragraphs_paste\Plugin\Derivative\OEmbedUrlDeriver"
  * )
  */
 class OEmbedUrl extends ParagraphsPastePluginBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function build($input) {
-    // Create media entity.
-    $media_type = $this->entityTypeManager->getDefinition('media');
-    $media_entity = $this->entityTypeManager->getStorage('media')
-      ->create([
-        $media_type->getKey('bundle') => $this->pluginDefinition['media_bundle'],
-      ]);
-
-    $media_entity->set($this->pluginDefinition['media_bundle_field'], $input);
-    $media_entity->save();
-
-    // Create paragraph entity and reference media entity.
-    $entity_type = $this->entityTypeManager->getDefinition('paragraph');
-
-    $paragraph_entity = $this->entityTypeManager->getStorage('paragraph')
-      ->create([
-        $entity_type->getKey('bundle') => $this->pluginDefinition['paragraph_bundle'],
-      ]);
-
-    $paragraph_entity->set($this->pluginDefinition['paragraph_bundle_field'], $media_entity);
-
-    return $paragraph_entity;
-  }
 
   /**
    * {@inheritdoc}
