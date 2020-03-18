@@ -22,7 +22,7 @@ class OEmbedUrlDeriver extends DeriverBase {
         'label' => $this->t('Remote video'),
         'description' => $this->t('Youtube or Vimeo URLs.'),
         'providers' => ['YouTube', 'Vimeo'],
-        'property_path' => 'paragraph.video.field_video:remote_video.field_media_oembed_video',
+        'property_path' => 'paragraph.video.field_video:video.field_media_video_embed_field',
       ],
       'twitter' => [
         'id' => 'oembed_url:twitter',
@@ -36,7 +36,6 @@ class OEmbedUrlDeriver extends DeriverBase {
         'label' => $this->t('Instagram'),
         'description' => $this->t('Instagram URLs.'),
         'providers' => ['Instagram'],
-        'media_bundle' => 'instagram',
         'property_path' => 'paragraph.instagram.field_media:instagram.field_url',
       ],
     ];
