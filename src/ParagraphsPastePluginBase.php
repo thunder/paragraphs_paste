@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Session\AccountProxyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,6 +44,13 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
   protected $entityReferenceSelectionManager;
 
   /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
    * Constructs a ParagraphsPastePluginBase object.
    *
    * @param array $configuration
@@ -57,12 +65,15 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
    *   The entity field manager.
    * @param \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface $selectionPluginManager
    *   The entity selection manager.
+   * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
+   *   The current user.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, SelectionPluginManagerInterface $selectionPluginManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, SelectionPluginManagerInterface $selectionPluginManager, AccountProxyInterface $currentUser) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entityTypeManager;
     $this->entityFieldManager = $entityFieldManager;
     $this->entityReferenceSelectionManager = $selectionPluginManager;
+    $this->currentUser = $currentUser;
   }
 
   /**
@@ -76,6 +87,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
       $container->get('plugin.manager.entity_reference_selection'),
+      $container->get('current_user')
     );
   }
 
@@ -134,7 +146,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
 
       /** @var \Drupal\Core\Entity\EntityInterface $newEntity */
       $newEntity = $this->entityReferenceSelectionManager->getSelectionHandler($fieldConfig)
-        ->createNewEntity($target_type, $bundle, 'Created by paragraphs paste', 0);
+        ->createNewEntity($target_type, $bundle, NULL, $this->currentUser->id());
 
       $entity->{$fieldName}[] = $newEntity;
       if (!empty($property_path)) {
