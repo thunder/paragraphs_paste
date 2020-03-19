@@ -148,15 +148,15 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $newEntity = $this->entityReferenceSelectionManager->getSelectionHandler($fieldConfig)
         ->createNewEntity($target_type, $bundle, NULL, $this->currentUser->id());
 
-      $entity->{$fieldName}[] = $newEntity;
       if (!empty($property_path)) {
         $this->setValue($property_path, $newEntity, $value);
       }
+      $newEntity->save();
+      $entity->{$fieldName}[] = $newEntity;
     }
     else {
       $entity->{$fieldName} = $value;
     }
-    $entity->save();
   }
 
 }
