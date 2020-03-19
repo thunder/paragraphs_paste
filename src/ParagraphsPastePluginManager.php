@@ -2,7 +2,6 @@
 
 namespace Drupal\paragraphs_paste;
 
-use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
@@ -36,33 +35,18 @@ class ParagraphsPastePluginManager extends DefaultPluginManager {
   }
 
   /**
-   * Load a plugin from user input.
+   * Return applicable plugins from user input.
    *
    * @param string $input
    *   Input string.
    *
-   * @return \Drupal\paragraphs_paste\ParagraphsPastePluginInterface|bool
-   *   The loaded plugin.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
-   *   If the instance cannot be created, such as if the ID is invalid.
+   * @return \Drupal\paragraphs_paste\ParagraphsPastePluginInterface[]
+   *   The available plugins.
    */
-  public function getPluginFromInput($input) {
-
-    $definitions = $this->getDefinitions();
-    $candidates = [];
-    foreach ($definitions as $definition) {
-      $is_applicable = $definition['class']::isApplicable($input, $definition);
-      if ($is_applicable) {
-        $candidates[] = $definition;
-      }
-    }
-    // Sort definitions / candidates by weight.
-    uasort($candidates, [SortArray::class, 'sortByWeightElement']);
-    if (!empty($candidates)) {
-      return $this->createInstance(end($candidates)['id']);
-    }
-    return FALSE;
+  public function getPluginsFromInput($input) {
+    return array_filter($this->getDefinitions(), function ($definition) use ($input) {
+      return $definition['class']::isApplicable($input, $definition);
+    });
   }
 
 }

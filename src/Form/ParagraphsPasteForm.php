@@ -4,6 +4,7 @@ namespace Drupal\paragraphs_paste\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -167,6 +168,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *
    * @return array
    *   Enriched data.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *   If the instance cannot be created, such as if the ID is invalid.
    */
   public static function traverseData(array $data, array $plugin_configuration) {
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
@@ -175,9 +179,18 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     // Enrich pasted data with plugins.
     foreach ($data as $value) {
-      $plugin = $plugin_manager->getPluginFromInput($value);
-      if ($plugin && ($property_path = $plugin_configuration[$plugin->getPluginId()])) {
-        $plugin->setPropertyPath($property_path);
+      if ($plugins = $plugin_manager->getPluginsFromInput($value)) {
+
+        // Filter out plugins without property path.
+        $plugins = array_filter($plugins, function ($plugin) use ($plugin_configuration) {
+          return !empty($plugin_configuration[$plugin['id']]);
+        });
+
+        // Sort definitions / candidates by weight.
+        uasort($plugins, [SortArray::class, 'sortByWeightElement']);
+
+        $plugin_id = end($plugins)['id'];
+        $plugin = $plugin_manager->createInstance($plugin_id, ['property_path' => $plugin_configuration[$plugin_id]]);
         $results[] = (object) ['plugin' => $plugin, 'value' => $value];
       }
     }
