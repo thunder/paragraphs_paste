@@ -51,6 +51,13 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
   protected $currentUser;
 
   /**
+   * The property path.
+   *
+   * @var string
+   */
+  protected $propertyPath;
+
+  /**
    * Constructs a ParagraphsPastePluginBase object.
    *
    * @param array $configuration
@@ -95,7 +102,10 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
    * {@inheritdoc}
    */
   public function build($input) {
-    $property_path = explode('.', $this->pluginDefinition['property_path']);
+    if (empty($this->propertyPath)) {
+      throw new \Exception('Property path not set');
+    }
+    $property_path = explode('.', $this->propertyPath);
 
     $target_entity_type = array_shift($property_path);
     $target_bundle = array_shift($property_path);
@@ -157,6 +167,19 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
     else {
       $entity->{$fieldName} = $value;
     }
+  }
+
+  /**
+   * Set the property path.
+   *
+   * @param string $property_path
+   *   The property path.
+   *
+   * @return $this
+   */
+  public function setPropertyPath($property_path) {
+    $this->propertyPath = $property_path;
+    return $this;
   }
 
 }

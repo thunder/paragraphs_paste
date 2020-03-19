@@ -5,7 +5,11 @@
  * Contains hooks for paragraphs_paste module.
  */
 
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\WidgetInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
 use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
 /**
@@ -35,4 +39,17 @@ function paragraphs_paste_preprocess_field_multiple_value_form(&$variables) {
       }
     }
   }
+}
+
+/**
+ * Implements hook_field_widget_third_party_settings_form().
+ */
+function paragraphs_paste_field_widget_third_party_settings_form(WidgetInterface $plugin, FieldDefinitionInterface $field_definition, $form_mode, $form, FormStateInterface $form_state) {
+  $elements = [];
+
+  if ($plugin instanceof ParagraphsWidget && $field_definition->getFieldStorageDefinition()->getCardinality() == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
+    $elements = ParagraphsPasteForm::getThirdPartyForm($plugin, $field_definition->getName());
+  }
+
+  return $elements;
 }

@@ -13,7 +13,6 @@ use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
  *   module = "paragraphs_paste",
  *   weight = 0,
  *   providers = {},
- *   property_path= "",
  *   deriver = "\Drupal\paragraphs_paste\Plugin\Derivative\OEmbedUrlDeriver"
  * )
  */

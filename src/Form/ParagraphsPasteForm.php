@@ -2,12 +2,12 @@
 
 namespace Drupal\paragraphs_paste\Form;
 
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\WidgetInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
@@ -77,7 +77,8 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    */
   public function formAlter(&$elements, FormStateInterface $form_state, array $context) {
 
-    if ($elements['#cardinality'] !== FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED || $form_state->isProgrammed()) {
+    $settings = $context['widget']->getThirdPartySettings('paragraphs_paste');
+    if (empty($settings['enabled']) || $form_state->isProgrammed()) {
       return;
     }
     // Construct wrapper id.
@@ -118,7 +119,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    */
   public static function pasteSubmit(array $form, FormStateInterface $form_state) {
     $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
-    $host = $form_state->getFormObject()->getEntity();
+    /** @var \Drupal\Core\Entity\ContentEntityForm $form_object */
+    $form_object = $form_state->getFormObject();
+    $host = $form_object->getEntity();
 
     $pasted_data = json_decode(
       NestedArray::getValue(
@@ -130,7 +133,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Split on urls and double newlines.
     $data = preg_split('~(https?://[^\s/$.?#].[^\s]*|[\r\n]+\s?[\r\n]+)~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
-    $items = self::traverseData($data);
+    $third_party_settings = $form_object->getFormDisplay($form_state)
+      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste']['mapping'];
+
+    $items = self::traverseData($data, $third_party_settings);
 
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
@@ -156,17 +162,24 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *
    * @param array $data
    *   Pasted data.
+   * @param array $plugin_configuration
+   *   Plugin configuration.
    *
    * @return array
    *   Enriched data.
    */
-  public static function traverseData(array $data) {
+  public static function traverseData(array $data, array $plugin_configuration) {
+    /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
     $results = [];
 
     // Enrich pasted data with plugins.
     foreach ($data as $value) {
-      $results[] = (object) ['plugin' => $plugin_manager->getPluginFromInput($value), 'value' => $value];
+      $plugin = $plugin_manager->getPluginFromInput($value);
+      if ($plugin && ($property_path = $plugin_configuration[$plugin->getPluginId()])) {
+        $plugin->setPropertyPath($property_path);
+        $results[] = (object) ['plugin' => $plugin, 'value' => $value];
+      }
     }
 
     foreach ($results as $key => $result) {
@@ -188,6 +201,46 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     }
 
     return $results;
+  }
+
+  /**
+   * Get 3rd party setting form for paragraphs paste.
+   *
+   * @param \Drupal\Core\Field\WidgetInterface $plugin
+   *   Widget plugin.
+   * @param string $field_name
+   *   Field name.
+   *
+   * @return array
+   *   Returns 3rd party form elements.
+   */
+  public static function getThirdPartyForm(WidgetInterface $plugin, $field_name) {
+    $elements = [];
+
+    $elements['enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Copy & Paste area'),
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'enabled'),
+    ];
+
+    $elements['mapping'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Copy & Paste mapping'),
+      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+    ];
+
+    /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
+    $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
+    foreach ($plugin_manager->getDefinitions() as $definition) {
+      $elements['mapping'][$definition['id']] = [
+        '#type' => 'textfield',
+        '#title' => $definition['label'],
+        '#fieldset' => 'paragraphs_paste',
+        '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'mapping')[$definition['id']],
+      ];
+    }
+
+    return $elements;
   }
 
 }
