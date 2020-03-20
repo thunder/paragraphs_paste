@@ -141,7 +141,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
-        $paragraph_entity = $item->plugin->createParagraphEntity($item->value, $form_object->getFormDisplay($form_state));
+        $paragraph_entity = $item->plugin->createParagraphEntity($item->value);
         /* @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
         $paragraph_entity->setParentEntity($host, $submit['field_name']);
         $submit['widget_state']['paragraphs'][] = [
