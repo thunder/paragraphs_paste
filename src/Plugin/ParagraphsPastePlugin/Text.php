@@ -12,7 +12,6 @@ use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
  *   label = @Translation("Text"),
  *   module = "paragraphs_paste",
  *   weight = -1,
- *   property_path= "paragraph.text.field_text"
  * )
  */
 class Text extends ParagraphsPastePluginBase {

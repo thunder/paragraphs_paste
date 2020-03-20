@@ -95,7 +95,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
    * {@inheritdoc}
    */
   public function build($input) {
-    $property_path = explode('.', $this->pluginDefinition['property_path']);
+    $property_path = explode('.', $this->configuration['property_path']);
 
     $target_entity_type = array_shift($property_path);
     $target_bundle = array_shift($property_path);
