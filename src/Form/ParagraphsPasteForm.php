@@ -134,14 +134,14 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Split on urls and double newlines.
     $data = preg_split('~(https?://[^\s/$.?#].[^\s]*|[\r\n]+\s?[\r\n]+)~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
-    $third_party_settings = $form_object->getFormDisplay($form_state)
+    $property_path_mapping = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste']['mapping'];
 
-    $items = self::traverseData($data, $third_party_settings);
+    $items = self::traverseData($data, $property_path_mapping);
 
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
-        $paragraph_entity = $item->plugin->build($item->value);
+        $paragraph_entity = $item->plugin->createParagraphEntity($item->value);
         /* @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
         $paragraph_entity->setParentEntity($host, $submit['field_name']);
         $submit['widget_state']['paragraphs'][] = [

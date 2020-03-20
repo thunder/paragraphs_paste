@@ -27,7 +27,7 @@ interface ParagraphsPastePluginInterface extends PluginInspectionInterface {
    * @return \Drupal\paragraphs\Entity\Paragraph
    *   An paragraph entity.
    */
-  public function build($input);
+  public function createParagraphEntity($input);
 
   /**
    * Returns if the plugin can be used for the provided content.
