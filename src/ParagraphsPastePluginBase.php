@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste;
 
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
@@ -44,6 +45,13 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
   protected $entityReferenceSelectionManager;
 
   /**
+   * The entity display repository service.
+   *
+   * @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface
+   */
+  protected $entityDisplayRepository;
+
+  /**
    * The current user.
    *
    * @var \Drupal\Core\Session\AccountProxyInterface
@@ -65,14 +73,17 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
    *   The entity field manager.
    * @param \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface $selectionPluginManager
    *   The entity selection manager.
+   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entityDisplayRepository
+   *   The entity display repository service.
    * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, SelectionPluginManagerInterface $selectionPluginManager, AccountProxyInterface $currentUser) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entityTypeManager, EntityFieldManagerInterface $entityFieldManager, SelectionPluginManagerInterface $selectionPluginManager, EntityDisplayRepositoryInterface $entityDisplayRepository, AccountProxyInterface $currentUser) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entityTypeManager;
     $this->entityFieldManager = $entityFieldManager;
     $this->entityReferenceSelectionManager = $selectionPluginManager;
+    $this->entityDisplayRepository = $entityDisplayRepository;
     $this->currentUser = $currentUser;
   }
 
@@ -87,6 +98,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $container->get('entity_type.manager'),
       $container->get('entity_field.manager'),
       $container->get('plugin.manager.entity_reference_selection'),
+      $container->get('entity_display.repository'),
       $container->get('current_user')
     );
   }
@@ -94,7 +106,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
   /**
    * {@inheritdoc}
    */
-  public function build($input) {
+  public function createParagraphEntity($input) {
     $property_path = explode('.', $this->configuration['property_path']);
 
     $target_entity_type = array_shift($property_path);
@@ -107,7 +119,7 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
         $entity_type->getKey('bundle') => $target_bundle,
       ]);
 
-    $this->setValue($property_path, $paragraph_entity, $input);
+    $this->setFieldValue($paragraph_entity, $property_path, $input);
 
     return $paragraph_entity;
   }
@@ -115,16 +127,18 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
   /**
    * Sets value to a property path.
    *
-   * @param array $property_path
-   *   Property path.
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   Entity to set the value on.
+   * @param array $property_path
+   *   Property path.
    * @param mixed $value
    *   The value to set.
+   * @param bool $save
+   *   Entity needs to be saved.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function setValue(array $property_path, EntityInterface $entity, $value) {
+  protected function setFieldValue(EntityInterface $entity, array $property_path, $value, $save = FALSE) {
 
     $fields = $this->entityFieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
 
@@ -148,10 +162,19 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $newEntity = $this->entityReferenceSelectionManager->getSelectionHandler($fieldConfig)
         ->createNewEntity($target_type, $bundle, NULL, $this->currentUser->id());
 
+      /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $formDisplay */
+      $formDisplay = $this->entityDisplayRepository->getFormDisplay($entity->getEntityTypeId(), $entity->bundle());
+
+      $save = $save || (!in_array($formDisplay->getComponent($fieldName)['type'], ['inline_entity_form_simple', 'inline_entity_form_complex']));
+
       if (!empty($property_path)) {
-        $this->setValue($property_path, $newEntity, $value);
+        $this->setFieldValue($newEntity, $property_path, $value, $save);
       }
-      $newEntity->save();
+
+      if ($save) {
+        $newEntity->save();
+      }
+
       $entity->{$fieldName}[] = $newEntity;
     }
     else {
