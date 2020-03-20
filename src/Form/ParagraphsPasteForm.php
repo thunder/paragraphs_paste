@@ -134,7 +134,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $settings = $form_object->getFormDisplay($form_state)->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
     $reg_ex = [];
-    if (!empty($settings['split_method']['paragraphs'])) {
+    if (!empty($settings['split_method']['paragraph'])) {
       $reg_ex[] = "[\r\n]+\s?[\r\n]+";
     }
     if (!empty($settings['split_method']['oEmbed'])) {
