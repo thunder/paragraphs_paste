@@ -131,17 +131,18 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       )
     );
 
-    $settings = $form_object->getFormDisplay($form_state)->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
+    $settings = $form_object->getFormDisplay($form_state)
+      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
     $reg_ex = [];
-    if (!empty($settings['split_method']['paragraph'])) {
-      $reg_ex[] = "[\r\n]+\s?[\r\n]+";
-    }
-    if (!empty($settings['split_method']['oEmbed'])) {
+    if ($settings['split_method']['oEmbed']) {
       $reg_ex[] = "https?://[^\s/$.?#].[^\s]*";
     }
-    if (!empty($settings['split_method']['regex'])) {
-      $reg_ex[] = $settings['split_method']['regex'];
+    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
+      $reg_ex[] = $settings['split_method_regex'];
+    }
+    if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
+      $reg_ex[] = "[\r\n]+\s?[\r\n]+";
     }
 
     // Split by RegEx.
@@ -263,30 +264,28 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     }
 
     $elements['split_method'] = [
-      '#type' => 'fieldset',
+      '#type' => 'checkboxes',
       '#title' => t('Split methods'),
       '#description' => t('Define when new paragraphs should be created.'),
+      '#required' => TRUE,
+      '#options' => [
+        'double_new_line' => t('By text double newline'),
+        'oEmbed' => t('By oEmbed URL'),
+        'regex' => 'By RegEx',
+      ],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
     ];
 
-    $elements['split_method']['paragraph'] = [
-      '#type' => 'checkbox',
-      '#title' => 'By text paragraph',
-      '#description' => '',
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method')['paragraph'],
-    ];
-
-    $elements['split_method']['oEmbed'] = [
-      '#type' => 'checkbox',
-      '#title' => 'By oEmbed URL',
-      '#description' => '',
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method')['oEmbed'],
-    ];
-
-    $elements['split_method']['regex'] = [
+    $elements['split_method_regex'] = [
       '#type' => 'textfield',
       '#title' => 'By RegEx',
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method')['regex'],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method_regex'),
+      '#states' => [
+        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+      ],
+
     ];
 
     return $elements;
