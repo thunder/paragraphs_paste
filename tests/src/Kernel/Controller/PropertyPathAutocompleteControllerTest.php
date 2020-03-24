@@ -7,6 +7,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\paragraphs_paste\Controller\PropertyPathAutocompleteController;
+use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -15,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @group paragraphs_paste
  */
 class PropertyPathAutocompleteControllerTest extends KernelTestBase {
+
+  use MediaTypeCreationTrait;
 
   /**
    * Modules to enable.
@@ -26,7 +29,8 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
     'paragraphs',
     'file',
     'field',
-
+    'media',
+    'image',
   ];
 
   /**
@@ -40,7 +44,6 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       'id' => 'text',
     ])->save();
 
-    // Add a test to the article.
     $field_storage = FieldStorageConfig::create([
       'field_name' => 'field_text',
       'entity_type' => 'paragraph',
@@ -64,6 +67,33 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       'id' => 'video',
     ])->save();
 
+
+    $media_type_oembed = $this->createMediaType('oembed:video', ['id' => 'remote_video', 'label' => 'Remote video']);
+    $this->createMediaType('image', ['id' => 'image', 'label' => 'Image']);
+
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => 'field_entity_reference',
+      'entity_type' => 'paragraph',
+      'type' => 'entity_reference',
+      'cardinality' => '1',
+      'settings' => [
+        'target_type' => 'media',
+      ],
+    ]);
+    $field_storage->save();
+    $field = FieldConfig::create([
+      'field_storage' => $field_storage,
+      'bundle' => 'video',
+      'settings' => [
+        'handler_settings' => [
+          'target_bundles' => [
+            $media_type_oembed->id() => $media_type_oembed->id(),
+          ],
+        ],
+      ],
+    ]);
+    $field->save();
+
   }
 
   /**
@@ -86,6 +116,10 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       [
         'paragraph.text.',
         '[{"value":"paragraph.text.field_text","label":"paragraph.text.field_text (field_text)","keyword":"field_text field_text"},{"value":"paragraph.text.parent_field_name","label":"paragraph.text.parent_field_name (Parent field name)","keyword":"parent_field_name Parent field name"},{"value":"paragraph.text.parent_id","label":"paragraph.text.parent_id (Parent ID)","keyword":"parent_id Parent ID"},{"value":"paragraph.text.parent_type","label":"paragraph.text.parent_type (Parent type)","keyword":"parent_type Parent type"}]',
+      ],
+      [
+        'paragraph.video.field_entity_reference:',
+        '[{"value":"paragraph.video.field_entity_reference:remote_video","label":"paragraph.video.field_entity_reference:remote_video (Remote video)","keyword":"remote_video Remote video"}]',
       ],
 
     ];

@@ -163,9 +163,15 @@ class PropertyPathAutocompleteController extends ControllerBase {
           ->getSetting('target_type');
         $definition = $this->entityTypeManager()->getDefinition($entityType);
 
-        $targetBundles = $this->entityTypeManager()
+        $entityBundles = $this->entityTypeManager()
           ->getStorage($definition->getBundleEntityType())
           ->loadMultiple();
+
+        $target_bundles = $definitions[$fieldName]->getSetting('handler_settings')['target_bundles'] ?? [];
+        $targetBundles = array_filter($entityBundles, function ($bundle) use ($target_bundles) {
+          return isset($target_bundles[$bundle->id()]);
+        });
+
         if ($bundle && isset($targetBundles[$bundle])) {
           $definitions = $this->entityFieldManager->getFieldDefinitions($entityType, $bundle);
           $value .= "$fieldName:$bundle.";
