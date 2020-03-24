@@ -67,7 +67,6 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       'id' => 'video',
     ])->save();
 
-
     $media_type_oembed = $this->createMediaType('oembed:video', ['id' => 'remote_video', 'label' => 'Remote video']);
     $this->createMediaType('image', ['id' => 'image', 'label' => 'Image']);
 
@@ -121,7 +120,6 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
         'paragraph.video.field_entity_reference:',
         '[{"value":"paragraph.video.field_entity_reference:remote_video","label":"paragraph.video.field_entity_reference:remote_video (Remote video)","keyword":"remote_video Remote video"}]',
       ],
-
     ];
   }
 
