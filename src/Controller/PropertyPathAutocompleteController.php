@@ -50,7 +50,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
       $matches = [
         [
           'value' => 'paragraph',
-          'label' => "paragraph... (Paragraph)",
+          'label' => "paragraph (Paragraph)",
           'keyword' => "paragraph Paragraph",
         ],
       ];
@@ -119,7 +119,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
       $name = $entityType . '.' . $targetBundle->id();
       $matches[] = [
         'value' => "$name",
-        'label' => "$name... ({$targetBundle->label()})",
+        'label' => "$name ({$targetBundle->label()})",
         'keyword' => "{$targetBundle->id()} {$targetBundle->label()}",
       ];
     }
@@ -200,20 +200,6 @@ class PropertyPathAutocompleteController extends ControllerBase {
             'label' => "$name ({$definition->getLabel()})",
             'keyword' => "{$definition->getName()} {$definition->getLabel()}",
           ];
-
-          if (in_array($definition->getType(),
-              [
-                'entity_reference_revisions',
-                'entity_reference',
-              ]) &&
-            !empty($definition->getSetting('handler_settings')['target_bundles'])
-          ) {
-            $matches[] = [
-              'value' => "$name",
-              'label' => "$name... ({$definition->getLabel()})",
-              'keyword' => "{$definition->getName()} {$definition->getLabel()}",
-            ];
-          }
         }
       }
     }

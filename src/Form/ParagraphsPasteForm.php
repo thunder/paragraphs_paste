@@ -251,6 +251,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+      '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name}'),
     ];
 
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
@@ -272,7 +273,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#options' => [
         'double_new_line' => t('By text double newline'),
         'oEmbed' => t('By oEmbed URL'),
-        'regex' => 'By RegEx',
+        'regex' => t('By RegEx'),
       ],
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
@@ -280,7 +281,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $elements['split_method_regex'] = [
       '#type' => 'textfield',
-      '#title' => 'By RegEx',
+      '#title' => t('By RegEx'),
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method_regex'),
       '#states' => [
         'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
