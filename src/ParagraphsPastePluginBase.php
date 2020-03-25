@@ -178,8 +178,21 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $entity->{$fieldName}[] = $newEntity;
     }
     else {
-      $entity->{$fieldName} = $value;
+      $entity->{$fieldName} = $this->formatInput($value);
     }
+  }
+
+  /**
+   * Format the input before assigning the field.
+   *
+   * @param string $value
+   *   The field value.
+   *
+   * @return string
+   *   The formatted field value.
+   */
+  protected function formatInput($value) {
+    return $value;
   }
 
 }

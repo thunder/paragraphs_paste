@@ -24,4 +24,11 @@ class Text extends ParagraphsPastePluginBase {
     return !empty(trim($input));
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function formatInput($value) {
+    return '<p>' . implode('</p><p>', array_filter(explode("\n", $value))) . '</p>';
+  }
+
 }
