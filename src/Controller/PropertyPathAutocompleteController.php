@@ -49,7 +49,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
       $searchKeyword = "";
       $matches = [
         [
-          'value' => 'paragraph',
+          'value' => 'paragraph.',
           'label' => "paragraph (Paragraph)",
           'keyword' => "paragraph Paragraph",
         ],
@@ -72,7 +72,6 @@ class PropertyPathAutocompleteController extends ControllerBase {
     }
 
     usort($matches, [$this, 'sortByLabelElement']);
-
     return new JsonResponse($matches);
   }
 
@@ -118,7 +117,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
     foreach ($targetBundles as $targetBundle) {
       $name = $entityType . '.' . $targetBundle->id();
       $matches[] = [
-        'value' => "$name",
+        'value' => "$name.",
         'label' => "$name ({$targetBundle->label()})",
         'keyword' => "{$targetBundle->id()} {$targetBundle->label()}",
       ];
@@ -196,13 +195,24 @@ class PropertyPathAutocompleteController extends ControllerBase {
             'text',
             'text_long',
             'string',
+          ])
+        ) {
+          $name = $value . $definition->getName();
+          $matches[] = [
+            'value' => "$name",
+            'label' => "$name ({$definition->getLabel()})",
+            'keyword' => "{$definition->getName()} {$definition->getLabel()}",
+          ];
+        }
+        elseif (!$definition->isReadOnly() &&
+          in_array($definition->getType(), [
             'entity_reference',
             'entity_reference_revisions',
           ])
         ) {
           $name = $value . $definition->getName();
           $matches[] = [
-            'value' => $name,
+            'value' => "$name:",
             'label' => "$name ({$definition->getLabel()})",
             'keyword' => "{$definition->getName()} {$definition->getLabel()}",
           ];
@@ -215,7 +225,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
       foreach ($targetBundles as $definition) {
         $name = $value . $definition->id();
         $matches[] = [
-          'value' => "$name",
+          'value' => "$name.",
           'label' => "$name ({$definition->label()})",
           'keyword' => "{$definition->id()} {$definition->label()}",
         ];
