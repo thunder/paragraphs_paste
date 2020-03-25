@@ -39,7 +39,7 @@ content:
     third_party_settings:
       paragraphs_paste:
         enabled: true
-        mapping:
+        property_path_mapping:
           'oembed_url:video': 'paragraph.video.field_video:remote_video.field_media_oembed_video'
           'oembed_url:twitter': ''
           'oembed_url:instagram': ''

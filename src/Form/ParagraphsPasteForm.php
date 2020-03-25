@@ -148,7 +148,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Split by RegEx.
     $data = preg_split('~(' . implode('|', $reg_ex) . ')~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
-    $items = self::traverseData($data, $settings['mapping']);
+    $items = self::traverseData($data, $settings['property_path_mapping']);
 
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
@@ -247,7 +247,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'enabled'),
     ];
 
-    $elements['mapping'] = [
+    $elements['property_path_mapping'] = [
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
@@ -257,11 +257,11 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
     foreach ($plugin_manager->getDefinitions() as $definition) {
-      $elements['mapping'][$definition['id']] = [
+      $elements['property_path_mapping'][$definition['id']] = [
         '#type' => 'textfield',
         '#title' => $definition['label'],
         '#autocomplete_route_name' => 'paragraphs_paste.autocomplete.property_path',
-        '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'mapping')[$definition['id']],
+        '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'property_path_mapping')[$definition['id']],
       ];
     }
 

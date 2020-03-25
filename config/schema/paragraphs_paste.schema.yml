@@ -5,7 +5,7 @@ paragraphs_paste_third_party:
     enabled:
       type: boolean
       label: 'Copy & Paste area enabled'
-    mapping:
+    property_path_mapping:
       type: sequence
       sequence:
         type: string
