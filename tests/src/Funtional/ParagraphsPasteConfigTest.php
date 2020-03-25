@@ -16,7 +16,7 @@ class ParagraphsPasteConfigTest extends BrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = ['paragraphs_paste'];
+  protected static $modules = ['paragraphs_paste_test'];
 
   /**
    * {@inheritdoc}
@@ -24,11 +24,8 @@ class ParagraphsPasteConfigTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * Tests that Paragraphs module can be uninstalled.
+   * Tests that paragraphs_paste can be installed.
    */
-  public function testUninstall() {
-
-
-  }
+  public function testInstall() {}
 
 }

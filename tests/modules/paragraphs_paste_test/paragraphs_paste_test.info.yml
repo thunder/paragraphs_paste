@@ -1,0 +1,7 @@
+name: 'Paragraphs Paste Test'
+type: module
+package: Testing
+dependencies:
+  - paragraphs_paste:paragraphs_paste
+  - drupal:node
+  - drupal:text
