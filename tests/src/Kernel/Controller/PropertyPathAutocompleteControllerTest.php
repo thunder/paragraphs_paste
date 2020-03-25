@@ -102,15 +102,15 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
     return [
       [
         'para',
-        '[{"value":"paragraph","label":"paragraph (Paragraph)","keyword":"paragraph Paragraph"}]',
+        '[{"value":"paragraph.","label":"paragraph (Paragraph)","keyword":"paragraph Paragraph"}]',
       ],
       [
         'paragraph.',
-        '[{"value":"paragraph.image","label":"paragraph.image (Image)","keyword":"image Image"},{"value":"paragraph.text","label":"paragraph.text (Text)","keyword":"text Text"},{"value":"paragraph.video","label":"paragraph.video (Video)","keyword":"video Video"}]',
+        '[{"value":"paragraph.image.","label":"paragraph.image (Image)","keyword":"image Image"},{"value":"paragraph.text.","label":"paragraph.text (Text)","keyword":"text Text"},{"value":"paragraph.video.","label":"paragraph.video (Video)","keyword":"video Video"}]',
       ],
       [
         'paragraph.te',
-        '[{"value":"paragraph.text","label":"paragraph.text (Text)","keyword":"text Text"}]',
+        '[{"value":"paragraph.text.","label":"paragraph.text (Text)","keyword":"text Text"}]',
       ],
       [
         'paragraph.text.',
@@ -118,7 +118,7 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       ],
       [
         'paragraph.video.field_entity_reference:',
-        '[{"value":"paragraph.video.field_entity_reference:remote_video","label":"paragraph.video.field_entity_reference:remote_video (Remote video)","keyword":"remote_video Remote video"}]',
+        '[{"value":"paragraph.video.field_entity_reference:remote_video.","label":"paragraph.video.field_entity_reference:remote_video (Remote video)","keyword":"remote_video Remote video"}]',
       ],
     ];
   }

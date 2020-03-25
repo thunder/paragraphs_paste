@@ -251,7 +251,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
-      '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name}'),
+      '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name} (Use arrow keys to navigate available options)'),
     ];
 
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
