@@ -6,20 +6,18 @@ paragraphs_paste_third_party:
       type: boolean
       label: 'Copy & Paste area enabled'
     mapping:
-      type: mapping
-      mapping:
-        oembed_url:video:
-          type: string
-        oembed_url:twitter:
-          type: string
-        oembed_url:instagram:
-          type: string
-        text:
-          type: string
-    split_method:
       type: sequence
       sequence:
         type: string
+    split_method:
+      type: mapping
+      mapping:
+        double_new_line:
+          type: string
+        oEmbed:
+          type: string
+        regex:
+          type: string
     split_method_regex:
       type: string
       label: 'RegEx'
