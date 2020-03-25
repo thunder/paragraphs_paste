@@ -38,7 +38,7 @@ content:
         collapse_edit_all: '0'
     third_party_settings:
       paragraphs_paste:
-        enabled: '1'
+        enabled: true
         mapping:
           'oembed_url:video': 'paragraph.video.field_video:remote_video.field_media_oembed_video'
           'oembed_url:twitter': ''
@@ -46,8 +46,8 @@ content:
           text: paragraph.text.field_text
         split_method:
           double_new_line: double_new_line
-          oEmbed: 0
-          regex: 0
+          oEmbed: '0'
+          regex: '0'
         split_method_regex: ''
     region: content
   promote:
