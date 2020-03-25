@@ -131,13 +131,24 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       )
     );
 
-    // Split on urls and double newlines.
-    $data = preg_split('~(https?://[^\s/$.?#].[^\s]*|[\r\n]+\s?[\r\n]+)~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    $settings = $form_object->getFormDisplay($form_state)
+      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
-    $property_path_mapping = $form_object->getFormDisplay($form_state)
-      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste']['mapping'];
+    $reg_ex = [];
+    if ($settings['split_method']['oEmbed']) {
+      $reg_ex[] = "https?://[^\s/$.?#].[^\s]*";
+    }
+    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
+      $reg_ex[] = $settings['split_method_regex'];
+    }
+    if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
+      $reg_ex[] = "[\r\n]+\s?[\r\n]+";
+    }
 
-    $items = self::traverseData($data, $property_path_mapping);
+    // Split by RegEx.
+    $data = preg_split('~(' . implode('|', $reg_ex) . ')~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
+    $items = self::traverseData($data, $settings['mapping']);
 
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
@@ -163,8 +174,8 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *
    * @param array $data
    *   Pasted data.
-   * @param array $plugin_configuration
-   *   Plugin configuration.
+   * @param array $property_path_mapping
+   *   Property path mapping.
    *
    * @return array
    *   Enriched data.
@@ -172,7 +183,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    *   If the instance cannot be created, such as if the ID is invalid.
    */
-  public static function traverseData(array $data, array $plugin_configuration) {
+  public static function traverseData(array $data, array $property_path_mapping) {
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
     $results = [];
@@ -182,15 +193,15 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       if ($plugins = $plugin_manager->getPluginsFromInput($value)) {
 
         // Filter out plugins without property path.
-        $plugins = array_filter($plugins, function ($plugin) use ($plugin_configuration) {
-          return !empty($plugin_configuration[$plugin['id']]);
+        $plugins = array_filter($plugins, function ($plugin) use ($property_path_mapping) {
+          return !empty($property_path_mapping[$plugin['id']]);
         });
 
         // Sort definitions / candidates by weight.
         uasort($plugins, [SortArray::class, 'sortByWeightElement']);
 
         $plugin_id = end($plugins)['id'];
-        $plugin = $plugin_manager->createInstance($plugin_id, ['property_path' => $plugin_configuration[$plugin_id]]);
+        $plugin = $plugin_manager->createInstance($plugin_id, ['property_path' => $property_path_mapping[$plugin_id]]);
         $results[] = (object) ['plugin' => $plugin, 'value' => $value];
       }
     }
@@ -240,6 +251,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+      '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name} (Use arrow keys to navigate available options)'),
     ];
 
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
@@ -248,10 +260,35 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       $elements['mapping'][$definition['id']] = [
         '#type' => 'textfield',
         '#title' => $definition['label'],
-        '#fieldset' => 'paragraphs_paste',
+        '#autocomplete_route_name' => 'paragraphs_paste.autocomplete.property_path',
         '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'mapping')[$definition['id']],
       ];
     }
+
+    $elements['split_method'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Split methods'),
+      '#description' => t('Define when new paragraphs should be created.'),
+      '#required' => TRUE,
+      '#options' => [
+        'double_new_line' => t('By text double newline'),
+        'oEmbed' => t('By oEmbed URL'),
+        'regex' => t('By RegEx'),
+      ],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
+      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+    ];
+
+    $elements['split_method_regex'] = [
+      '#type' => 'textfield',
+      '#title' => t('By RegEx'),
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method_regex'),
+      '#states' => [
+        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+      ],
+
+    ];
 
     return $elements;
   }

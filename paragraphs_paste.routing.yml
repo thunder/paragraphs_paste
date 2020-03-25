@@ -1,0 +1,7 @@
+paragraphs_paste.autocomplete.property_path:
+  path: '/admin/paragraphs_paste/autocomplete/property_path'
+  defaults:
+    _controller: '\Drupal\paragraphs_paste\Controller\PropertyPathAutocompleteController::handleAutocomplete'
+    _format: json
+  requirements:
+    _access: 'TRUE'
