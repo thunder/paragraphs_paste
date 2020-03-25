@@ -5,9 +5,9 @@ namespace Drupal\Tests\paragraphs\Functional;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests that Paragraphs module can be uninstalled.
+ * Tests that Paragraphs paste config test.
  *
- * @group paragraphs
+ * @group paragraphs_paste
  */
 class ParagraphsPasteConfigTest extends BrowserTestBase {
 
