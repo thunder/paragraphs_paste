@@ -195,6 +195,8 @@ class PropertyPathAutocompleteController extends ControllerBase {
             'text',
             'text_long',
             'string',
+            'string_long',
+            'text_with_summary',
           ])
         ) {
           $name = $value . $definition->getName();

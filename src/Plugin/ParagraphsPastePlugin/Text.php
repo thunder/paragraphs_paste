@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
 
 /**
@@ -27,8 +28,22 @@ class Text extends ParagraphsPastePluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function formatInput($value) {
-    return '<p>' . implode('</p><p>', array_filter(explode("\n", $value))) . '</p>';
+  protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
+
+    if (in_array($fieldDefinition->getType(), [
+      'text',
+      'text_long',
+      'text_with_summary',
+    ])) {
+      return '<p>' . implode('</p><p>', array_filter(explode("\n", $value))) . '</p>';
+    }
+
+    if ($fieldDefinition->getType() == 'string') {
+      return trim(preg_replace('/\s+/', ' ', $value));
+    }
+
+    // For 'string_long' everything is fine.
+    return $value;
   }
 
 }
