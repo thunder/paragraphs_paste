@@ -60,7 +60,7 @@ class ParagraphsPasteTest extends WebDriverTestBase {
     $jsScript = "var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('.paragraphs-paste-action').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));";
     $session->executeScript($jsScript);
     $this->assertJsCondition("document.querySelector('[data-drupal-selector=\"edit-field-paragraphs-0-subform-field-text-0-value\"]')", 10000, 'Text field in paragraph form should be visible.');
-    $this->assertEquals($text, $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph');
+    $this->assertEquals($text, $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
 
   }
 
