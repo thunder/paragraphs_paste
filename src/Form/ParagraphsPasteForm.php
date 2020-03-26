@@ -83,7 +83,8 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       return;
     }
     // Construct wrapper id.
-    $fieldWrapperId = Html::getId(implode('-', array_merge($context['form']['#parents'], [$elements['#field_name']])) . '-add-more-wrapper');
+    $fieldIdPrefix = implode('-', array_merge($context['form']['#parents'], [$elements['#field_name']]));
+    $fieldWrapperId = Html::getId($fieldIdPrefix . '-add-more-wrapper');
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
     $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
@@ -101,7 +102,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $elements['paragraphs_paste']['paste_action'] = [
       '#type' => 'submit',
-      '#name' => $elements['#field_name'] . '_paste_action',
+      '#name' => $fieldIdPrefix . '_paste_action',
       '#value' => $this->t('Paste'),
       '#submit' => [[get_class($this), 'pasteSubmit']],
       '#attributes' => [
