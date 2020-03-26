@@ -101,6 +101,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $elements['paragraphs_paste']['paste_action'] = [
       '#type' => 'submit',
+      '#name' => $elements['#field_name'] . '_paste_action',
       '#value' => $this->t('Paste'),
       '#submit' => [[get_class($this), 'pasteSubmit']],
       '#attributes' => [
