@@ -263,6 +263,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         '#type' => 'textfield',
         '#title' => $definition['label'],
         '#autocomplete_route_name' => 'paragraphs_paste.autocomplete.property_path',
+        '#autocomplete_route_parameters' => ['allowed_field_types' => $definition['allowed_field_types']],
         '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'property_path_mapping')[$definition['id']],
       ];
     }
