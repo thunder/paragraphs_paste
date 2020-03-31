@@ -2,9 +2,6 @@
 
 namespace Drupal\Tests\paragraphs_paste\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\Tests\paragraphs\FunctionalJavascript\LoginAdminTrait;
-
 /**
  * Tests the creation of paragraphs by pasting random data.
  *
