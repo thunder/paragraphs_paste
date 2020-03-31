@@ -24,7 +24,7 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     // Check that paste functionality is working with default config.
     $text = "Lorem ipsum dolor sit amet.";
     $this->drupalGet("node/add/$content_type");
-    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-pa    ste-paste-action"]'), 'Paragraphs Paste area should be visible.');
+    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
 
     $this->simulatePasteEvent($text);
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
