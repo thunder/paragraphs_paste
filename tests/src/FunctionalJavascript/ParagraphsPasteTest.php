@@ -23,16 +23,7 @@ class ParagraphsPasteTest extends WebDriverTestBase {
    */
   protected static $modules = [
     'paragraphs_paste_test',
-    'paragraphs_paste',
-    'paragraphs',
-    'entity_reference_revisions',
-    'file',
-    'field',
     'field_ui',
-    'media',
-    'node',
-    'system',
-    'text',
   ];
 
   /**
@@ -62,6 +53,7 @@ class ParagraphsPasteTest extends WebDriverTestBase {
     $this->assertJsCondition("document.querySelector('[data-drupal-selector=\"edit-field-paragraphs-0-subform-field-text-0-value\"]')", 10000, 'Text field in paragraph form should be visible.');
     $this->assertEquals($text, $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
 
+#    $this->assertTrue(FALSE);
   }
 
 }
