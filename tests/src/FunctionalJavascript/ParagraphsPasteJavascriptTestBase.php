@@ -38,8 +38,7 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    *   Text to copy.
    */
   public function simulatePasteEvent($selector, $text) {
-    $jsScript = "var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));";
-    $this->getSession()->executeScript($jsScript);
+    $this->getSession()->executeScript("var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
   }
 
   /**
@@ -53,7 +52,7 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    *   (Optional) Message to pass to assertJsCondition().
    */
   public function waitForElementPresent($selector, $timeout = 1000, $message = '') {
-    $this->assertJsCondition("document.querySelector('" . $selector . "')", $timeout, $message);
+    $this->assertJsCondition("document.querySelector('{$selector}')", $timeout, $message);
   }
 
 }
