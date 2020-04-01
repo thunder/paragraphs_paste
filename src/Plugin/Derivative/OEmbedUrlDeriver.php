@@ -51,8 +51,8 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
     if ($definition = $this->mediaSourceManager->getDefinition('oembed:video', FALSE)) {
       $this->derivatives[] = [
         'id' => 'oembed_url:video',
-        'label' => $this->t('Remote video'),
-        'description' => $this->t('Youtube or Vimeo URLs.'),
+        'label' => $definition['label'],
+        'description' => $definition['description'],
         'providers' => $definition['providers'],
         'allowed_field_types' => $definition['allowed_field_types'],
       ] + $base_plugin_definition;
@@ -60,8 +60,8 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
     if ($definition = $this->mediaSourceManager->getDefinition('twitter', FALSE)) {
       $this->derivatives[] = [
         'id' => 'oembed_url:twitter',
-        'label' => $this->t('Twitter'),
-        'description' => $this->t('Twitter URLs.'),
+        'label' => $definition['label'],
+        'description' => $definition['description'],
         'providers' => ['Twitter'],
         'allowed_field_types' => $definition['allowed_field_types'],
       ] + $base_plugin_definition;
@@ -69,8 +69,8 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
     if ($definition = $this->mediaSourceManager->getDefinition('instagram', FALSE)) {
       $this->derivatives[] = [
         'id' => 'oembed_url:instagram',
-        'label' => $this->t('Instagram'),
-        'description' => $this->t('Instagram URLs.'),
+        'label' => $definition['label'],
+        'description' => $definition['description'],
         'providers' => ['Instagram'],
         'allowed_field_types' => $definition['allowed_field_types'],
       ] + $base_plugin_definition;
