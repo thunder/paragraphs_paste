@@ -8,7 +8,8 @@
   'use strict';
 
   /**
-   * Handle event when "Paste" button is clicked
+   * Handle event when "Paste" button is clicked.
+   *
    * @param {event} event The event.
    */
   var pasteHandler = function (event) {
@@ -18,7 +19,7 @@
     event.stopPropagation();
     event.preventDefault();
 
-    // Get pasted data via clipboard API
+    // Get pasted data via clipboard API.
     clipboardData = event.originalEvent.clipboardData || window.clipboardData;
     pastedData = JSON.stringify(clipboardData.getData('Text'));
 
@@ -28,7 +29,7 @@
   };
 
   /**
-   * Theme function for remove button
+   * Theme function for remove button.
    *
    * @param {object} options
    *   Options for delete confirmation button.
@@ -37,11 +38,7 @@
    *   Returns markup.
    */
   Drupal.theme.paragraphsPasteActionArea = function (options) {
-    return '<div class="paragraphs-paste-action" data-paragraphs-paste-target="' + options.target + '">' +
-      '<div class="paragraphs-paste-message">' +
-        '<p>' + Drupal.t('Paste here.') + '</p>' +
-        '</div>' +
-      '</div>';
+    return `<div class="paragraphs-paste-action" data-paragraphs-paste-target="${options.target}"><div class="paragraphs-paste-message"><p>${Drupal.t('Paste here.')}</p></div></div>`;
   };
 
   /**
