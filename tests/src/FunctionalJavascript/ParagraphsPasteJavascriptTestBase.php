@@ -32,11 +32,13 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
   /**
    * Simulate paste event.
    *
+   * @param string $selector
+   *   The CSS selector.
    * @param string $text
    *   Text to copy.
    */
-  public function simulatePasteEvent($text) {
-    $jsScript = "var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('.paragraphs-paste-action').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));";
+  public function simulatePasteEvent($selector, $text) {
+    $jsScript = "var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));";
     $this->getSession()->executeScript($jsScript);
   }
 
