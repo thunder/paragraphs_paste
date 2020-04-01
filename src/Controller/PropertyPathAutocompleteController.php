@@ -5,6 +5,7 @@ namespace Drupal\paragraphs_paste\Controller;
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldConfigInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -191,7 +192,10 @@ class PropertyPathAutocompleteController extends ControllerBase {
       $searchKeyword = end($parts);
 
       foreach ($definitions as $definition) {
-        if (!$definition->isReadOnly() && in_array($definition->getType(), $types)) {
+        if (!$definition instanceof FieldConfigInterface) {
+          continue;
+        }
+        if (in_array($definition->getType(), $types)) {
           $name = $value . $definition->getName();
           $matches[] = [
             'value' => "$name",
@@ -199,12 +203,10 @@ class PropertyPathAutocompleteController extends ControllerBase {
             'keyword' => "{$definition->getName()} {$definition->getLabel()}",
           ];
         }
-        elseif (!$definition->isReadOnly() &&
-          in_array($definition->getType(), [
-            'entity_reference',
-            'entity_reference_revisions',
-          ])
-        ) {
+        elseif (in_array($definition->getType(), [
+          'entity_reference',
+          'entity_reference_revisions',
+        ])) {
           $name = $value . $definition->getName();
           $matches[] = [
             'value' => "$name:",
