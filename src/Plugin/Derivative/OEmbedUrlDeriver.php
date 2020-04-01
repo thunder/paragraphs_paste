@@ -49,7 +49,7 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
 
     $this->derivatives = [];
     if ($definition = $this->mediaSourceManager->getDefinition('oembed:video', FALSE)) {
-      $this->derivatives[] = [
+      $this->derivatives['video'] = [
         'id' => 'oembed_url:video',
         'label' => $definition['label'],
         'description' => $definition['description'],
@@ -58,7 +58,7 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
       ] + $base_plugin_definition;
     }
     if ($definition = $this->mediaSourceManager->getDefinition('twitter', FALSE)) {
-      $this->derivatives[] = [
+      $this->derivatives['twitter'] = [
         'id' => 'oembed_url:twitter',
         'label' => $definition['label'],
         'description' => $definition['description'],
@@ -67,7 +67,7 @@ class OEmbedUrlDeriver extends DeriverBase implements ContainerDeriverInterface 
       ] + $base_plugin_definition;
     }
     if ($definition = $this->mediaSourceManager->getDefinition('instagram', FALSE)) {
-      $this->derivatives[] = [
+      $this->derivatives['instagram'] = [
         'id' => 'oembed_url:instagram',
         'label' => $definition['label'],
         'description' => $definition['description'],
