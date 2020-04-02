@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -178,8 +179,23 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       $entity->{$fieldName}[] = $newEntity;
     }
     else {
-      $entity->{$fieldName} = $value;
+      $entity->{$fieldName} = $this->formatInput($value, $fieldConfig);
     }
+  }
+
+  /**
+   * Format the input before assigning the field.
+   *
+   * @param string $value
+   *   The field value.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $fieldDefinition
+   *   The field definition.
+   *
+   * @return string
+   *   The formatted field value.
+   */
+  protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
+    return $value;
   }
 
 }
