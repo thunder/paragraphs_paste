@@ -5,3 +5,4 @@ dependencies:
   - paragraphs_paste:paragraphs_paste
   - drupal:node
   - drupal:text
+  - drupal:media

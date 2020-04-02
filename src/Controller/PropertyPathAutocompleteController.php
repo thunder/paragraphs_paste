@@ -5,6 +5,7 @@ namespace Drupal\paragraphs_paste\Controller;
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\FieldConfigInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +46,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
    */
   public function handleAutocomplete(Request $request) {
     $string = $request->query->get('q');
+    $types = $request->query->get('allowed_field_types', []);
     if (substr_count($string, '.') == 0) {
       $searchKeyword = "";
       $matches = [
@@ -62,7 +64,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
       [
         $searchKeyword,
         $matches,
-      ] = $this->matchField($string, []);
+      ] = $this->matchField($string, $types);
     }
 
     if ($searchKeyword) {
@@ -130,7 +132,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
    *
    * @param string $string
    *   Current search string.
-   * @param string $types
+   * @param array $types
    *   Allowed field types.
    *
    * @return array
@@ -139,7 +141,7 @@ class PropertyPathAutocompleteController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function matchField($string, $types) {
+  protected function matchField($string, array $types = []) {
     $matches = [];
 
     $parts = explode('.', $string);
@@ -190,15 +192,10 @@ class PropertyPathAutocompleteController extends ControllerBase {
       $searchKeyword = end($parts);
 
       foreach ($definitions as $definition) {
-        if (!$definition->isReadOnly() &&
-          in_array($definition->getType(), [
-            'text',
-            'text_long',
-            'string',
-            'string_long',
-            'text_with_summary',
-          ])
-        ) {
+        if (!$definition instanceof FieldConfigInterface) {
+          continue;
+        }
+        if (in_array($definition->getType(), $types)) {
           $name = $value . $definition->getName();
           $matches[] = [
             'value' => "$name",
@@ -206,12 +203,10 @@ class PropertyPathAutocompleteController extends ControllerBase {
             'keyword' => "{$definition->getName()} {$definition->getLabel()}",
           ];
         }
-        elseif (!$definition->isReadOnly() &&
-          in_array($definition->getType(), [
-            'entity_reference',
-            'entity_reference_revisions',
-          ])
-        ) {
+        elseif (in_array($definition->getType(), [
+          'entity_reference',
+          'entity_reference_revisions',
+        ])) {
           $name = $value . $definition->getName();
           $matches[] = [
             'value' => "$name:",

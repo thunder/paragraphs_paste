@@ -63,7 +63,7 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
       ],
       [
         'paragraph.text.',
-        '[{"value":"paragraph.text.behavior_settings","label":"paragraph.text.behavior_settings (Behavior settings)","keyword":"behavior_settings Behavior settings"},{"value":"paragraph.text.field_text","label":"paragraph.text.field_text (Text)","keyword":"field_text Text"},{"value":"paragraph.text.parent_field_name","label":"paragraph.text.parent_field_name (Parent field name)","keyword":"parent_field_name Parent field name"},{"value":"paragraph.text.parent_id","label":"paragraph.text.parent_id (Parent ID)","keyword":"parent_id Parent ID"},{"value":"paragraph.text.parent_type","label":"paragraph.text.parent_type (Parent type)","keyword":"parent_type Parent type"}]',
+        '[{"value":"paragraph.text.field_text","label":"paragraph.text.field_text (Text)","keyword":"field_text Text"}]',
       ],
       [
         'paragraph.video.field_video:',
@@ -80,7 +80,7 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
   public function testHandleAutocomplete($input, $result) {
 
     $controller = PropertyPathAutocompleteController::create($this->container);
-    $response = $controller->handleAutocomplete(new Request(['q' => $input]));
+    $response = $controller->handleAutocomplete(new Request(['q' => $input, 'allowed_field_types' => ['text_long']]));
     $this->assertSame($result, $response->getContent());
   }
 
