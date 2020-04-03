@@ -31,4 +31,19 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     $this->assertEquals("<p>{$text}</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
   }
 
+  /**
+   * Test paste functionality.
+   */
+  public function testPastingTwice() {
+    $this->testPaste();
+
+    $session = $this->getSession();
+    $page = $session->getPage();
+
+    $text = "Bacon ipsum dolor amet cow picanha andouille strip steak tongue..";
+    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-1-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
+    $this->assertEquals("<p>{$text}</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-1-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
+  }
+
 }
