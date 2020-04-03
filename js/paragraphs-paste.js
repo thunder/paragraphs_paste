@@ -60,8 +60,7 @@
     detach: function (context) {
       var $buttons = $('[data-paragraphs-paste="enabled"]', context);
       $buttons.each(function () {
-        var $this = $(this);
-        $this.closest('.form-wrapper').removeOnce('paragraphsPaste');
+        $(this).closest('.form-wrapper').removeOnce('paragraphsPaste');
       });
     }
   };
