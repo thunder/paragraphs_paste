@@ -13,8 +13,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\paragraphs\Plugin\Field\FieldWidget\ParagraphsWidget;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
-use Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin\OEmbedUrl;
-use Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin\Text;
 use Drupal\paragraphs_paste\ParagraphsPastePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -144,7 +142,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       $reg_ex[] = $settings['split_method_regex'];
     }
     if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
-      $reg_ex[] = "[\r\n]+\s?[\r\n]+";
+      $reg_ex[] = "(\r ?\n|\n){2}";
     }
 
     // Split by RegEx.
@@ -207,24 +205,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         $plugin_id = end($plugins)['id'];
         $plugin = $plugin_manager->createInstance($plugin_id, ['property_path' => $property_path_mapping[$plugin_id]]);
         $results[] = (object) ['plugin' => $plugin, 'value' => $value];
-      }
-    }
-
-    foreach ($results as $key => $result) {
-      // Merge text items following a split on an oembed url.
-      if ($result->plugin instanceof OEmbedUrl) {
-
-        $iterator = $key + 1;
-        while ($iterator < count($results)) {
-          $current = $iterator;
-          $next = $iterator + 1;
-
-          if ($results[$current]->plugin instanceof Text && $results[$next]->plugin instanceof Text) {
-            $results[$next]->value = $results[$current]->value . $results[$next]->value;
-            $results[$current]->plugin = FALSE;
-          }
-          $iterator++;
-        }
       }
     }
 

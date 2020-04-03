@@ -48,7 +48,7 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     $this->loginAsAdmin();
 
     // Check that paste functionality is working with default config.
-    $text = 'Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola.\r\nhttps://www.youtube.com/watch?v=mt_1M0eRkcc\r\nPicanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.';
+    $text = 'Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola.\n\nhttps://www.youtube.com/watch?v=3pX4iPEPA9A\n\nPicanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.';
     $this->drupalGet("node/add/$content_type");
     $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
 
@@ -56,8 +56,7 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
 
     $this->assertEquals("<p>Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola.</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
-
-
+    $this->assertEquals("Drupal Rap - Monster (remix) feat. A.Hughes and D.Stagg (1)", $page->find('xpath', '//input[@data-drupal-selector="edit-field-paragraphs-1-subform-field-video-0-target-id"]')->getValue(), 'Video should be connected to the paragraph subform.');
     $this->assertEquals("<p>Picanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-2-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
   }
 
