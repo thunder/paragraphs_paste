@@ -152,6 +152,8 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $items = self::traverseData($data, $settings['property_path_mapping']);
 
+    $submit['widget_state']['real_items_count'] = $submit['widget_state']['real_items_count'] ?? 0;
+    $submit['widget_state']['items_count'] = $submit['widget_state']['items_count'] ?? 0;
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
         $paragraph_entity = $item->plugin->createParagraphEntity($item->value);
