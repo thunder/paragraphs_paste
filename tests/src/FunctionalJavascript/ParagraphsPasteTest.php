@@ -36,6 +36,32 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   }
 
   /**
+   * Test multiline text with video functionality.
+   */
+  public function testMultilineTextPaste() {
+    $content_type = 'article';
+
+    $session = $this->getSession();
+    $page = $session->getPage();
+    $driver = $session->getDriver();
+
+    $this->loginAsAdmin();
+
+    // Check that paste functionality is working with default config.
+    $text = 'Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola.\r\nhttps://www.youtube.com/watch?v=mt_1M0eRkcc\r\nPicanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.';
+    $this->drupalGet("node/add/$content_type");
+    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
+
+    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
+
+    $this->assertEquals("<p>Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola.</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
+
+
+    $this->assertEquals("<p>Picanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.</p>", $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-2-subform-field-text-0-value"]')->getText(), 'Text should be pasted into paragraph subform.');
+  }
+
+  /**
    * Verify that the paste area stays after a first paste.
    */
   public function testPastingTwice() {
