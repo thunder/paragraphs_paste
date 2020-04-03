@@ -32,7 +32,7 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   }
 
   /**
-   * Test paste functionality.
+   * Verify that the paste area stays after a first paste.
    */
   public function testPastingTwice() {
     $this->testPaste();
