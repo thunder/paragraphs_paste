@@ -56,7 +56,13 @@
           .on('paste', pasteHandler)
           .on('mousedown', function () { $(this).attr('contenteditable', true); });
       });
-
+    },
+    detach: function (context) {
+      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
+      $buttons.each(function () {
+        var $this = $(this);
+        var $wrapper = $this.closest('.form-wrapper').removeOnce('paragraphsPaste');
+      });
     }
   };
 
