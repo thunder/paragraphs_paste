@@ -309,8 +309,14 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *   The complete form structure.
    */
   public static function validateRegEx(array &$element, FormStateInterface $form_state, array &$complete_form) {
-    if (empty($form_state->getValue($element['#parents']))) {
-      $form_state->setErrorByName(implode('][', $element['#parents']), t('A RegEx needs to be defined.'));
+
+    $parents = $element['#parents'];
+    array_pop($parents);
+    $parents[] = 'split_method';
+
+    $split_methods = $form_state->getValue($parents);
+    if (empty($form_state->getValue($element['#parents'])) && !empty($split_methods['regex'])) {
+      $form_state->setError($element, t('A RegEx needs to be defined.'));
     }
   }
 
