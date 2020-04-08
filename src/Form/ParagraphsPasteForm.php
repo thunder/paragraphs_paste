@@ -292,10 +292,33 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
         'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
       ],
-
+      '#element_validate' => [[__CLASS__, 'validateRegEx']],
     ];
 
     return $elements;
+  }
+
+  /**
+   * Validates the regex field element.
+   *
+   * @param array $element
+   *   The form element to process.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $complete_form
+   *   The complete form structure.
+   */
+  public static function validateRegEx(array &$element, FormStateInterface $form_state, array &$complete_form) {
+
+    $split_method_parents = $element['#parents'];
+    array_pop($split_method_parents);
+    $split_method_parents[] = 'split_method';
+
+    $split_methods = $form_state->getValue($split_method_parents);
+    $regex = $form_state->getValue($element['#parents']);
+    if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
+      $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
+    }
   }
 
 }
