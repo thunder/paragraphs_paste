@@ -21,10 +21,19 @@
 
     // Get pasted data via clipboard API.
     clipboardData = event.originalEvent.clipboardData || window.clipboardData;
-    pastedData = JSON.stringify(clipboardData.getData('Text'));
+    pastedData = JSON.stringify(clipboardData.getData('text/html'));
+
+    // https://github.com/apostrophecms/sanitize-html
+    var sanitizedData = sanitizeHtml(pastedData, {
+      allowedTags: [ 'b', 'i', 'em', 'p', 'strong', 'a', 'ul', 'li' ],
+      allowedAttributes: {
+        'a': [ 'href' ]
+      }
+//      allowedIframeHostnames: ['www.youtube.com']
+    });
 
     var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
-    $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);
+    $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(    var sanitizedData);
     $('[data-drupal-selector="' + pasteTarget + '"]').trigger('mousedown');
   };
 
