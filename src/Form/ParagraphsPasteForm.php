@@ -142,7 +142,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       $reg_ex[] = $settings['split_method_regex'];
     }
     if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
-      $reg_ex[] = "(\r ?\n|\n){2}";
+      $reg_ex[] = "(?:\r\n *|\n *){2,}";
     }
 
     // Split by RegEx.
