@@ -74,6 +74,7 @@
           CKEDITOR.on("instanceReady", event => {
             var editor = event.editor;
             if (editor.element.$.dataset.drupalSelector === button.dataset.drupalSelector.replace(/action$/, 'content-value')) {
+              editor.config.pasteFromWordPromptCleanup = false;
               editor.on('afterPaste', event => {
                   document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
                     .dispatchEvent(new Event('mousedown'));
