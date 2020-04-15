@@ -92,7 +92,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
 
     $elements['paragraphs_paste']['paste_content'] = [
-      '#type' => 'hidden',
+      '#type' => 'text_format',
       '#attributes' => [
         'class' => ['visually-hidden'],
       ],
@@ -124,12 +124,11 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $form_object = $form_state->getFormObject();
     $host = $form_object->getEntity();
 
-    $pasted_data = json_decode(
-      NestedArray::getValue(
-        $form_state->getUserInput(),
-        array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
-      )
-    );
+    // Get value from textarea.
+    $pasted_data = NestedArray::getValue(
+      $form_state->getUserInput(),
+      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
+    )['value'];
 
     $settings = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
