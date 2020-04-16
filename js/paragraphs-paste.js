@@ -58,7 +58,7 @@
     attach: function (context) {
       var buttons = context.querySelectorAll('[data-paragraphs-paste="enabled"]');
 
-      Array.prototype.forEach.call(buttons, button => {
+      buttons.forEach(button => {
         var wrapper = button.closest('.form-wrapper');
 
         if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
@@ -86,7 +86,7 @@
       });
     },
     detach: function (context) {
-      Array.prototype.forEach.call(context.querySelectorAll('[data-paragraphs-paste="enabled"]'), button => {
+      context.querySelectorAll('[data-paragraphs-paste="enabled"]').forEach(button => {
         var wrapper = button.closest('.form-wrapper');
         wrapper.querySelector('.paragraphs-paste-action').remove();
         wrapper.removeAttribute('paragraphsPasteActionProcessed');
