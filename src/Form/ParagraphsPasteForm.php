@@ -86,7 +86,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
     $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
-    $elements['paragraphs_paste']['#after_build'][] = [get_class($this), 'afterBuild'];
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
@@ -307,25 +306,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
-  }
-
-  /**
-   * After-build handler for field elements in a form.
-   *
-   * Remove description and input formats from textarea.
-   *
-   * @param array $element
-   *   The form element.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
-   *
-   * @return array
-   *   The form element.
-   */
-  public static function afterBuild(array $element, FormStateInterface $form_state) {
-    $element['paste_content']['format']['#attributes']['class'][] = 'visually-hidden';
-
-    return $element;
   }
 
 }
