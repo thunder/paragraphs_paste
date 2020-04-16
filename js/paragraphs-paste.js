@@ -20,10 +20,11 @@
 
     // Get pasted data via clipboard API.
     clipboardData = event.clipboardData || window.clipboardData;
-    var targetSelector = event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value');
-    var bodyElement = CKEDITOR.instances[targetSelector].document.getBody();
+//    var targetSelector = event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value');
+    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
 
-    bodyElement.$.dispatchEvent(new ClipboardEvent('paste', {clipboardData: clipboardData}));
+    var editable = CKEDITOR.instances[targetElement.id].editable();
+    editable.$.dispatchEvent(new ClipboardEvent('paste', {clipboardData: clipboardData}));
   };
 
   /**
@@ -76,10 +77,13 @@
             if (editor.element.$.dataset.drupalSelector === button.dataset.drupalSelector.replace(/action$/, 'content-value')) {
               editor.config.pasteFromWordPromptCleanup = false;
               editor.on('afterPaste', event => {
-                  document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
-                    .dispatchEvent(new Event('mousedown'));
-                }
-              );
+                document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
+                  .dispatchEvent(new Event('mousedown'));
+              });
+              editor.on('paste', event => {
+                console.log(event);
+                var x = 1;
+              });
             }
           });
         }
@@ -88,8 +92,10 @@
     detach: function (context) {
       context.querySelectorAll('[data-paragraphs-paste="enabled"]').forEach(button => {
         var wrapper = button.closest('.form-wrapper');
-        wrapper.querySelector('.paragraphs-paste-action').remove();
-        wrapper.removeAttribute('paragraphsPasteActionProcessed');
+        if (wrapper.getAttribute('paragraphsPasteActionProcessed')) {
+          wrapper.querySelector('.paragraphs-paste-action').remove();
+          wrapper.removeAttribute('paragraphsPasteActionProcessed');
+        }
       });
     }
   };

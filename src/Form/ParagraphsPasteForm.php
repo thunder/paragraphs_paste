@@ -86,12 +86,21 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
     $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
+    $elements['paragraphs_paste']['#after_build'][] = [get_class($this), 'afterBuild'];
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
     $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
 
-    $elements['paragraphs_paste']['paste_content'] = [
+    $elements['paragraphs_paste']['paste'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'class' => ['visually-hidden'],
+      ],
+    ];
+
+    $elements['paragraphs_paste']['paste']['content'] = [
       '#type' => 'text_format',
       '#attributes' => [
         'class' => ['visually-hidden'],
@@ -127,7 +136,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Get value from textarea.
     $pasted_data = NestedArray::getValue(
       $form_state->getUserInput(),
-      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
+      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
     )['value'];
 
     $settings = $form_object->getFormDisplay($form_state)
@@ -298,6 +307,25 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
+  }
+
+  /**
+   * After-build handler for field elements in a form.
+   *
+   * Remove description and input formats from textarea.
+   *
+   * @param array $element
+   *   The form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return array
+   *   The form element.
+   */
+  public static function afterBuild(array $element, FormStateInterface $form_state) {
+    $element['paste_content']['format']['#attributes']['class'][] = 'visually-hidden';
+
+    return $element;
   }
 
 }
