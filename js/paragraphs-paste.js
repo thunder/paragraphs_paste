@@ -8,23 +8,20 @@
   'use strict';
 
   /**
-   * Handle event when "Paste" button is clicked.
+   * Forward 'paste' event ckeditor.
    *
    * @param {event} event The event.
    */
-  var pasteHandler = function (event) {
-    var clipboardData;
+  var pasteHandler = function (event, data) {
+
+    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
+    var editor = CKEDITOR.instances[targetElement.id];
+
+    editor.focus();
+    editor.editable().$.dispatchEvent(new event.constructor(event.type, event));
 
     event.stopPropagation();
     event.preventDefault();
-
-    // Get pasted data via clipboard API.
-    clipboardData = event.clipboardData || window.clipboardData;
-//    var targetSelector = event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value');
-    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
-
-    var editable = CKEDITOR.instances[targetElement.id].editable();
-    editable.$.dispatchEvent(new ClipboardEvent('paste', {clipboardData: clipboardData}));
   };
 
   /**
@@ -79,10 +76,6 @@
               editor.on('afterPaste', event => {
                 document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
                   .dispatchEvent(new Event('mousedown'));
-              });
-              editor.on('paste', event => {
-                console.log(event);
-                var x = 1;
               });
             }
           });
