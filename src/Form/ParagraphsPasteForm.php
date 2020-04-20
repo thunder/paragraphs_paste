@@ -311,7 +311,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $parts = [];
 
     if ($settings['split_method']['oEmbed']) {
-      $parts[] = "https?://[^\s/$.?#].[^\s]*";
+      $parts[] = "https?://[^\s/$.?#].[^\s<]*";
     }
     if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
       $parts[] = $settings['split_method_regex'];
