@@ -18,7 +18,10 @@
     var editor = CKEDITOR.instances[targetElement.id];
 
     editor.focus();
-    editor.editable().$.dispatchEvent(new event.constructor(event.type, event));
+    var editableElem = editor.editable().$;
+    // Reset editor contents.
+    editableElem.innerHTML = "";
+    editableElem.dispatchEvent(new event.constructor(event.type, event));
 
     event.stopPropagation();
     event.preventDefault();
