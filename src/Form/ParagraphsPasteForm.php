@@ -141,19 +141,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $settings = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
-    $reg_ex = [];
-    if ($settings['split_method']['oEmbed']) {
-      $reg_ex[] = "https?://[^\s/$.?#].[^\s]*";
-    }
-    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
-      $reg_ex[] = $settings['split_method_regex'];
-    }
-    if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
-      $reg_ex[] = "(?:\r\n *|\n *){2,}";
-    }
-
-    // Split by RegEx.
-    $data = preg_split('~(' . implode('|', $reg_ex) . ')~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    // Split by RegEx pattern.
+    $pattern = self::buildRegExPattern($settings);
+    $data = preg_split($pattern, $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
     $items = self::traverseData($data, $settings['property_path_mapping']);
 
@@ -306,6 +296,30 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
+  }
+
+  /**
+   * Build regex pattern based on config settings.
+   *
+   * @param array $settings
+   *   The form settings.
+   *
+   * @return string
+   *   The regex pattern.
+   */
+  public static function buildRegExPattern(array $settings) {
+    $parts = [];
+
+    if ($settings['split_method']['oEmbed']) {
+      $parts[] = "https?://[^\s/$.?#].[^\s]*";
+    }
+    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
+      $parts[] = $settings['split_method_regex'];
+    }
+    if ($settings['split_method']['double_new_line'] || empty($parts)) {
+      $parts[] = "(?:\r\n *|\n *){2,}";
+    }
+    return '~(' . implode('|', $parts) . ')~';
   }
 
 }
