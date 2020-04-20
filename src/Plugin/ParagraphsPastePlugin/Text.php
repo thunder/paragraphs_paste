@@ -24,7 +24,7 @@ class Text extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input, array $definition) {
     // Catch all content.
-    return !empty(trim($input));
+    return !empty(trim($input)) && $input !== '<p>';
   }
 
   /**
@@ -35,6 +35,9 @@ class Text extends ParagraphsPastePluginBase {
     if ($fieldDefinition->getType() == 'string') {
       return trim(preg_replace('/\s+/', ' ', $value));
     }
+
+    // Remove trailing whitespace chars.
+    $value = rtrim($value);
 
     // For 'string_long', 'text', 'text_long', 'text_with_summary' everything
     // is fine.
