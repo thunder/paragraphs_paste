@@ -42,7 +42,7 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    *   Text to copy.
    */
   public function simulatePasteEvent($selector, $text) {
-    $this->getSession()->executeScript("var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+    $this->getSession()->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
   }
 
   /**
