@@ -2,16 +2,17 @@
   "extends": "eslint:recommended",
   "root": true,
   "env": {
-    "browser": true
+    "browser": true,
+    "es6": true,
+    "node": true
   },
   "globals": {
     "Drupal": true,
     "drupalSettings": true,
     "drupalTranslations": true,
-    "domready": true,
     "jQuery": true,
     "_": true,
-    "matchMedia": true,
+    "Cookies": true,
     "Backbone": true,
     "Modernizr": true,
     "Popper": true,
