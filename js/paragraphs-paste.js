@@ -65,7 +65,7 @@
         if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
           var area = Drupal.theme('paragraphsPasteActionArea', {target: button.dataset.drupalSelector});
           area.addEventListener('mousedown', pasteHandler);
-          area.addEventListener('mousemove', event => {
+          area.addEventListener('mouseleave', event => {
             event.currentTarget.classList.remove('paragraphs-paste-action-focus');
           });
 
