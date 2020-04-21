@@ -138,6 +138,12 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
     )['value'];
 
+    NestedArray::setValue(
+      $form_state->getUserInput(),
+      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content']),
+      ''
+    );
+
     $settings = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
