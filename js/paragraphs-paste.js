@@ -20,7 +20,7 @@
 
         if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
           wrapper.setAttribute('paragraphsPasteActionProcessed', true);
-          // wrapper.prepend(contentElem);
+          wrapper.prepend(contentElem);
           contentElem.classList.remove('visually-hidden');
 
           CKEDITOR.on('instanceReady', event => {
@@ -40,7 +40,9 @@
       context.querySelectorAll('[data-paragraphs-paste="enabled"]').forEach(button => {
         var wrapper = button.closest('.form-wrapper');
         if (wrapper.getAttribute('paragraphsPasteActionProcessed')) {
-//          wrapper.querySelector('.paragraphs-paste-area').remove();
+          var contentElem = wrapper.querySelector('.paragraphs-paste-area');
+          contentElem.classList.add('visually-hidden');
+          button.parentNode.prepend(contentElem);
           wrapper.removeAttribute('paragraphsPasteActionProcessed');
         }
       });
