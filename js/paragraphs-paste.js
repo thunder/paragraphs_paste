@@ -13,6 +13,7 @@
    * @param {event} event The event.
    */
   var pasteHandler = function (event, data) {
+    event.currentTarget.classList.add('paragraphs-paste-action-focus');
 
     var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
     var editor = CKEDITOR.instances[targetElement.id];
@@ -20,8 +21,7 @@
     editor.focus();
     var editableElem = editor.editable().$;
     // Reset editor contents.
-    editableElem.innerHTML = "";
-    editableElem.dispatchEvent(new event.constructor(event.type, event));
+    editableElem.innerHTML = '';
 
     event.stopPropagation();
     event.preventDefault();
@@ -64,9 +64,9 @@
 
         if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
           var area = Drupal.theme('paragraphsPasteActionArea', {target: button.dataset.drupalSelector});
-          area.addEventListener('paste', pasteHandler);
-          area.addEventListener('mousedown', function () {
-            this.setAttribute('contenteditable', true);
+          area.addEventListener('mousedown', pasteHandler);
+          area.addEventListener('mousemove', event => {
+            event.currentTarget.classList.remove('paragraphs-paste-action-focus');
           });
 
           wrapper.prepend(area);
