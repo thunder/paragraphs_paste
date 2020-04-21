@@ -24,7 +24,7 @@ class Text extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input, array $definition) {
     // Catch all content.
-    return !empty(trim($input)) && $input !== '<p>' && $input !== '</p>';
+    return !empty(trim($input)) && $input !== '<p>' && $input !== '</p>' && $input !== '<p>&nbsp;</p>';
   }
 
   /**
