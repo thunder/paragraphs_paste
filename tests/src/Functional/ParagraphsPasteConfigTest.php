@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\paragraphs\Functional;
+namespace Drupal\Tests\paragraphs_paste\Functional;
 
 use Drupal\Tests\BrowserTestBase;
 
