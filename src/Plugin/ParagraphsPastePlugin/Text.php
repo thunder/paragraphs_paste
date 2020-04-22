@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
 
@@ -24,6 +25,10 @@ class Text extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input, array $definition) {
 
+    if (empty(trim($input))) {
+      return FALSE;
+    }
+
     $document = new \DOMDocument();
     $document->loadHTML($input);
     $xpath = new \DOMXPath($document);
@@ -33,11 +38,7 @@ class Text extends ParagraphsPastePluginBase {
         $node->parentNode->removeChild($node);
       }
     }
-    $document->formatOutput = TRUE;
-    $input = $document->saveHTML();
-    // Strip doctype, html and body tags..
-    $input = substr($input, 119, strlen($input) - 119 - 15);
-
+    $input = Html::serialize($document);
     return !empty(trim($input));
   }
 
