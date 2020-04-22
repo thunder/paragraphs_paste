@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\paragraphs_paste\Plugin\ParagraphsPastePlugin;
+namespace Drupal\Tests\paragraphs_paste\Kernel\Plugin\ParagraphsPastePlugin;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
