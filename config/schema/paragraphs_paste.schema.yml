@@ -14,8 +14,6 @@ paragraphs_paste_third_party:
       mapping:
         double_new_line:
           type: string
-        oEmbed:
-          type: string
         regex:
           type: string
     split_method_regex:

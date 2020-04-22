@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
 
 /**
@@ -23,6 +24,7 @@ class OEmbedUrl extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   public static function isApplicable($input, array $definition) {
+    $input = strip_tags($input);
     /** @var \Drupal\media\OEmbed\UrlResolverInterface $resolver */
     $resolver = \Drupal::service('media.oembed.url_resolver');
 
@@ -39,6 +41,13 @@ class OEmbedUrl extends ParagraphsPastePluginBase {
     }
 
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
+    return strip_tags($value);;
   }
 
 }
