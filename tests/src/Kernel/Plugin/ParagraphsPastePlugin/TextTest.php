@@ -14,9 +14,7 @@ use Drupal\KernelTests\KernelTestBase;
 class TextTest extends KernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'paragraphs_paste',
@@ -26,13 +24,35 @@ class TextTest extends KernelTestBase {
   ];
 
   /**
-   * Test the handle autocomplete method.
+   * Data provider for formatInput.
    */
-  public function testFormatInput() {
+  public function formatInputProvider() {
+    return [
+      [
+        'string',
+        '<p>Test string.</p><p>With <br/>
+         br.</p>',
+        'Test string.With br.',
+      ],
+      [
+        'string_long',
+        '<p>Test string.</p><p>With <br/>
+         br.</p>',
+        "Test string.With\nbr.",
+      ],
+    ];
+  }
+
+  /**
+   * Test format input an a string field.
+   *
+   * @dataProvider formatInputProvider
+   */
+  public function testFormatInput($fieldType, $input, $output) {
     $field_storage = FieldStorageConfig::create([
       'field_name' => 'field_text',
       'entity_type' => 'entity_test',
-      'type' => 'string',
+      'type' => $fieldType,
       'cardinality' => '1',
     ]);
     $field_storage->save();
@@ -52,7 +72,7 @@ class TextTest extends KernelTestBase {
     $method = $class->getMethod('formatInput');
     $method->setAccessible(TRUE);
 
-    $this->assertSame('Test string.With br.', $method->invokeArgs($text, ['<p>Test string.</p><p>With <br/> br.</p>', $field]));
+    $this->assertSame($output, $method->invokeArgs($text, [$input, $field]));
   }
 
 }
