@@ -24,7 +24,7 @@ class Text extends ParagraphsPastePluginBase {
    */
   public static function isApplicable($input, array $definition) {
     // Catch all content.
-    return !empty(trim($input));
+    return !empty(trim($input)) && $input !== '<p>' && $input !== '</p>' && $input !== '<p>&nbsp;</p>';
   }
 
   /**
@@ -32,19 +32,15 @@ class Text extends ParagraphsPastePluginBase {
    */
   protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
 
-    if (in_array($fieldDefinition->getType(), [
-      'text',
-      'text_long',
-      'text_with_summary',
-    ])) {
-      return '<p>' . implode('</p><p>', array_filter(explode("\n", $value))) . '</p>';
-    }
-
     if ($fieldDefinition->getType() == 'string') {
       return trim(preg_replace('/\s+/', ' ', $value));
     }
 
-    // For 'string_long' everything is fine.
+    // Remove trailing whitespace chars.
+    $value = rtrim($value);
+
+    // For 'string_long', 'text', 'text_long', 'text_with_summary' everything
+    // is fine.
     return $value;
   }
 

@@ -91,8 +91,16 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // see paragraphs_preprocess_field_multiple_value_form().
     $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
 
-    $elements['paragraphs_paste']['paste_content'] = [
-      '#type' => 'hidden',
+    $elements['paragraphs_paste']['paste'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'class' => ['visually-hidden'],
+      ],
+    ];
+
+    $elements['paragraphs_paste']['paste']['content'] = [
+      '#type' => 'text_format',
       '#attributes' => [
         'class' => ['visually-hidden'],
       ],
@@ -124,29 +132,24 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $form_object = $form_state->getFormObject();
     $host = $form_object->getEntity();
 
-    $pasted_data = json_decode(
-      NestedArray::getValue(
-        $form_state->getUserInput(),
-        array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste_content'])
-      )
+    // Get value from textarea.
+    $pasted_data = NestedArray::getValue(
+      $form_state->getUserInput(),
+      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
+    )['value'];
+
+    NestedArray::setValue(
+      $form_state->getUserInput(),
+      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content']),
+      ''
     );
 
     $settings = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
-    $reg_ex = [];
-    if ($settings['split_method']['oEmbed']) {
-      $reg_ex[] = "https?://[^\s/$.?#].[^\s]*";
-    }
-    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
-      $reg_ex[] = $settings['split_method_regex'];
-    }
-    if ($settings['split_method']['double_new_line'] || empty($reg_ex)) {
-      $reg_ex[] = "(?:\r\n *|\n *){2,}";
-    }
-
-    // Split by RegEx.
-    $data = preg_split('~(' . implode('|', $reg_ex) . ')~', $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    // Split by RegEx pattern.
+    $pattern = self::buildRegExPattern($settings);
+    $data = preg_split($pattern, $pasted_data, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
     $items = self::traverseData($data, $settings['property_path_mapping']);
 
@@ -299,6 +302,30 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
+  }
+
+  /**
+   * Build regex pattern based on config settings.
+   *
+   * @param array $settings
+   *   The form settings.
+   *
+   * @return string
+   *   The regex pattern.
+   */
+  public static function buildRegExPattern(array $settings) {
+    $parts = [];
+
+    if ($settings['split_method']['oEmbed']) {
+      $parts[] = "https?://[^\s/$.?#].[^\s<]*";
+    }
+    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
+      $parts[] = $settings['split_method_regex'];
+    }
+    if ($settings['split_method']['double_new_line'] || empty($parts)) {
+      $parts[] = "(?:\r\n *|\n *){2,}";
+    }
+    return '~(' . implode('|', $parts) . ')~';
   }
 
 }

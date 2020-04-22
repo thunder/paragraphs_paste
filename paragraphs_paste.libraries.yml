@@ -5,4 +5,4 @@ init:
     theme:
       css/paragraphs-paste.css: {}
   dependencies:
-    - core/jquery.once
+    - core/ckeditor

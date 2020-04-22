@@ -32,6 +32,10 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
     'node',
     'system',
     'text',
+    'filter',
+    'editor',
+    'user',
+    'ckeditor',
   ];
 
   /**

@@ -7,7 +7,6 @@ dependencies:
   module:
     - paragraphs
     - paragraphs_paste
-    - text
 id: node.article.default
 targetEntityType: node
 bundle: article
@@ -41,12 +40,10 @@ content:
         enabled: true
         property_path_mapping:
           'oembed_url:video': 'paragraph.video.field_video:remote_video.field_media_oembed_video'
-          'oembed_url:twitter': ''
-          'oembed_url:instagram': ''
           text: paragraph.text.field_text
         split_method:
           double_new_line: double_new_line
-          oEmbed: '0'
+          oEmbed: oEmbed
           regex: '0'
         split_method_regex: ''
     region: content
