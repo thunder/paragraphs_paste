@@ -3,66 +3,97 @@
  * Paragraphs actions JS code for paragraphs actions button.
  */
 
-(function ($, Drupal) {
+(function (Drupal, CKEDITOR) {
 
   'use strict';
 
   /**
-   * Handle event when "Paste" button is clicked.
+   * Forward 'paste' event ckeditor.
    *
    * @param {event} event The event.
    */
-  var pasteHandler = function (event) {
-    var clipboardData;
-    var pastedData;
+  var pasteHandler = function (event, data) {
+    event.currentTarget.classList.add('paragraphs-paste-action-focus');
+
+    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
+    var editor = CKEDITOR.instances[targetElement.id];
+
+    editor.focus();
+    var editableElem = editor.editable().$;
+    // Reset editor contents.
+    editableElem.innerHTML = '';
 
     event.stopPropagation();
     event.preventDefault();
-
-    // Get pasted data via clipboard API.
-    clipboardData = event.originalEvent.clipboardData || window.clipboardData;
-    pastedData = JSON.stringify(clipboardData.getData('Text'));
-
-    var pasteTarget = $(event.currentTarget).data('paragraphs-paste-target');
-    $('[data-drupal-selector="' + pasteTarget.replace(/action$/, 'content') + '"]').val(pastedData);
-    $('[data-drupal-selector="' + pasteTarget + '"]').trigger('mousedown');
   };
 
   /**
-   * Theme function for remove button.
+   * Theme function for paste area.
    *
    * @param {object} options
    *   Options for delete confirmation button.
    *
-   * @return {string}
-   *   Returns markup.
+   * @return {HTMLElement}
+   *   Returns paste area as DOM Node .
    */
   Drupal.theme.paragraphsPasteActionArea = function (options) {
-    return `<div class="paragraphs-paste-action" data-paragraphs-paste-target="${options.target}"><div class="paragraphs-paste-message"><p>${Drupal.t('Paste here.')}</p></div></div>`;
+    var message = document.createElement('p');
+    message.textContent = Drupal.t('Paste here.');
+
+    var messageWrapper = document.createElement('div');
+    messageWrapper.setAttribute('class', 'paragraphs-paste-message');
+    messageWrapper.appendChild(message);
+
+    var areaWrapper = document.createElement('div');
+    areaWrapper.setAttribute('class', 'paragraphs-paste-action');
+    areaWrapper.setAttribute('data-paragraphs-paste-target', options.target);
+    areaWrapper.appendChild(messageWrapper);
+
+    return areaWrapper;
   };
 
   /**
-   * Process paragraph_AddAboveButton elements.
+   * Add paragraphsPasteAction behavior.
    */
   Drupal.behaviors.paragraphsPasteAction = {
     attach: function (context) {
-      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
-      $buttons.each(function () {
-        var $this = $(this);
-        var $wrapper = $this.closest('.form-wrapper').once('paragraphsPaste');
+      var buttons = context.querySelectorAll('[data-paragraphs-paste="enabled"]');
 
-        $wrapper.find('> div').prepend(Drupal.theme('paragraphsPasteActionArea', {target: $this.data('drupalSelector')}));
-        $wrapper.find('.paragraphs-paste-action')
-          .on('paste', pasteHandler)
-          .on('mousedown', function () { $(this).attr('contenteditable', true); });
+      buttons.forEach(button => {
+        var wrapper = button.closest('.form-wrapper');
+
+        if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
+          var area = Drupal.theme('paragraphsPasteActionArea', {target: button.dataset.drupalSelector});
+          area.addEventListener('mousedown', pasteHandler);
+          area.addEventListener('mouseleave', event => {
+            event.currentTarget.classList.remove('paragraphs-paste-action-focus');
+          });
+
+          wrapper.prepend(area);
+          wrapper.setAttribute('paragraphsPasteActionProcessed', true);
+
+          CKEDITOR.on("instanceReady", event => {
+            var editor = event.editor;
+            if (editor.element.$.dataset.drupalSelector === button.dataset.drupalSelector.replace(/action$/, 'content-value')) {
+              editor.config.pasteFromWordPromptCleanup = false;
+              editor.on('afterPaste', event => {
+                document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
+                  .dispatchEvent(new Event('mousedown'));
+              });
+            }
+          });
+        }
       });
     },
     detach: function (context) {
-      var $buttons = $('[data-paragraphs-paste="enabled"]', context);
-      $buttons.each(function () {
-        $(this).closest('.form-wrapper').removeOnce('paragraphsPaste');
+      context.querySelectorAll('[data-paragraphs-paste="enabled"]').forEach(button => {
+        var wrapper = button.closest('.form-wrapper');
+        if (wrapper.getAttribute('paragraphsPasteActionProcessed')) {
+          wrapper.querySelector('.paragraphs-paste-action').remove();
+          wrapper.removeAttribute('paragraphsPasteActionProcessed');
+        }
       });
     }
   };
 
-})(jQuery, Drupal);
+})(Drupal, CKEDITOR);

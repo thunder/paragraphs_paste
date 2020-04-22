@@ -6,6 +6,19 @@
   cursor: pointer;
 }
 
+.paragraphs-paste-action-focus {
+  outline-width: 5px;
+  outline-style: solid;
+  outline-color: Highlight;
+}
+
+@media (-webkit-min-device-pixel-ratio:0) {
+  .paragraphs-paste-action-focus {
+    outline-color: -webkit-focus-ring-color;
+    outline-style: auto;
+  }
+}
+
 .paragraphs-paste-action .paragraphs-paste-message {
   text-align: center;
   margin: 2em 0;
