@@ -23,8 +23,22 @@ class Text extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   public static function isApplicable($input, array $definition) {
-    // Catch all content.
-    return !empty(trim($input)) && $input !== '<p>' && $input !== '</p>' && $input !== '<p>&nbsp;</p>';
+
+    $document = new \DOMDocument();
+    $document->loadHTML($input);
+    $xpath = new \DOMXPath($document);
+    // Remove empty html tags recursively.
+    while (($node_list = $xpath->query('//*[not(node())]')) && $node_list->length) {
+      foreach ($node_list as $node) {
+        $node->parentNode->removeChild($node);
+      }
+    }
+    $document->formatOutput = TRUE;
+    $input = $document->saveHTML();
+    // Strip doctype, html and body tags..
+    $input = substr($input, 119, strlen($input) - 119 - 15);
+
+    return !empty(trim($input));
   }
 
   /**
