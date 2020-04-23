@@ -2,6 +2,7 @@
 
 namespace Drupal\paragraphs_paste\Plugin\ParagraphsPastePlugin;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
 
@@ -23,8 +24,21 @@ class Text extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   public static function isApplicable($input, array $definition) {
-    // Catch all content.
-    return !empty(trim($input)) && $input !== '<p>' && $input !== '</p>' && $input !== '<p>&nbsp;</p>';
+
+    if (empty(trim($input))) {
+      return FALSE;
+    }
+
+    $document = Html::load($input);
+    $xpath = new \DOMXPath($document);
+    // Remove empty html tags recursively.
+    while (($node_list = $xpath->query('//*[not(node())]')) && $node_list->length) {
+      foreach ($node_list as $node) {
+        $node->parentNode->removeChild($node);
+      }
+    }
+    $input = Html::serialize($document);
+    return !empty(trim($input));
   }
 
   /**
