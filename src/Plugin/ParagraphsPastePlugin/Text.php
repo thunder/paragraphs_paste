@@ -29,8 +29,7 @@ class Text extends ParagraphsPastePluginBase {
       return FALSE;
     }
 
-    $document = new \DOMDocument();
-    $document->loadHTML($input);
+    $document = Html::load($html);
     $xpath = new \DOMXPath($document);
     // Remove empty html tags recursively.
     while (($node_list = $xpath->query('//*[not(node())]')) && $node_list->length) {
