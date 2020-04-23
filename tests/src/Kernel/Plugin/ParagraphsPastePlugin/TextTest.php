@@ -45,6 +45,11 @@ class TextTest extends KernelTestBase {
         "A text with non&nbsp;breaking&nbsp;spaces.",
         'A text with non breaking spaces.',
       ],
+      [
+        'text_long',
+        "<p></p><p></p></p><p><span><span>Text with empty tags, paragraphs containing non breaking space, </span></span></p>\r\n\r\n<p>&nbsp;</p>\r\n<p><span><span>and newlines </span></span></p>\r\n<p>&nbsp;</p>",
+        '<p><span><span>Text with empty tags, paragraphs containing non breaking space, </span></span></p><p><span><span>and newlines </span></span></p>',
+      ],
     ];
   }
 
