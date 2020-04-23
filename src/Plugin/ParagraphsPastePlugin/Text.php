@@ -50,6 +50,7 @@ class Text extends ParagraphsPastePluginBase {
       $value = html_entity_decode($value);
       return trim(preg_replace('/\s+/', ' ', strip_tags($value)));
     }
+
     if ($fieldDefinition->getType() == 'string_long') {
       $value = html_entity_decode($value);
       $lines = array_map('trim', explode(PHP_EOL, strip_tags($value)));
@@ -59,8 +60,9 @@ class Text extends ParagraphsPastePluginBase {
     // Remove trailing whitespace chars.
     $value = rtrim($value);
 
-    // For 'text', 'text_long', 'text_with_summary' everything
-    // is fine.
+    // For 'text', 'text_long', 'text_with_summary' remove empty paragraphs.
+    $value = preg_replace('/<p[^>]*>([\s]|&nbsp;)*<\/p>/', '', $value);
+
     return $value;
   }
 
