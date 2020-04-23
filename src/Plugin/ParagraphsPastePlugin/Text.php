@@ -47,13 +47,19 @@ class Text extends ParagraphsPastePluginBase {
   protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
 
     if ($fieldDefinition->getType() == 'string') {
-      return trim(preg_replace('/\s+/', ' ', $value));
+      $value = html_entity_decode($value);
+      return trim(preg_replace('/\s+/', ' ', strip_tags($value)));
+    }
+    if ($fieldDefinition->getType() == 'string_long') {
+      $value = html_entity_decode($value);
+      $lines = array_map('trim', explode(PHP_EOL, strip_tags($value)));
+      return implode(PHP_EOL, $lines);
     }
 
     // Remove trailing whitespace chars.
     $value = rtrim($value);
 
-    // For 'string_long', 'text', 'text_long', 'text_with_summary' everything
+    // For 'text', 'text_long', 'text_with_summary' everything
     // is fine.
     return $value;
   }
