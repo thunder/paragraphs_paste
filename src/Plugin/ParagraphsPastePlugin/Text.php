@@ -46,6 +46,9 @@ class Text extends ParagraphsPastePluginBase {
    */
   protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
 
+    // Remove non-breaking spaces.
+    $value = preg_replace('~\x{00a0}~siu', ' ', $value);
+
     if ($fieldDefinition->getType() == 'string') {
       return trim(preg_replace('/\s+/', ' ', strip_tags($value)));
     }
