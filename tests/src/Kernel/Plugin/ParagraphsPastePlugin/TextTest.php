@@ -42,8 +42,8 @@ class TextTest extends KernelTestBase {
       ],
       [
         'string_long',
-        '<p>A text with non breaking spaces.</p>',
-        "A text with non breaking spaces.",
+        "A text with non&nbsp;breaking&nbsp;spaces.",
+        'A text with non breaking spaces.',
       ],
     ];
   }
