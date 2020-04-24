@@ -29,16 +29,7 @@ class Text extends ParagraphsPastePluginBase {
       return FALSE;
     }
 
-    $document = Html::load($input);
-    $xpath = new \DOMXPath($document);
-    // Remove empty html tags recursively.
-    while (($node_list = $xpath->query('//*[not(node())]')) && $node_list->length) {
-      foreach ($node_list as $node) {
-        $node->parentNode->removeChild($node);
-      }
-    }
-    $input = Html::serialize($document);
-    return !empty(trim($input));
+    return !empty(trim(self::cleanHtml($input)));
   }
 
   /**
@@ -50,18 +41,41 @@ class Text extends ParagraphsPastePluginBase {
       $value = html_entity_decode($value);
       return trim(preg_replace('/\s+/', ' ', strip_tags($value)));
     }
+
     if ($fieldDefinition->getType() == 'string_long') {
       $value = html_entity_decode($value);
       $lines = array_map('trim', explode(PHP_EOL, strip_tags($value)));
       return implode(PHP_EOL, $lines);
     }
 
-    // Remove trailing whitespace chars.
-    $value = rtrim($value);
+    // For 'text', 'text_long', 'text_with_summary', do:
+    // Clean newlines and empty paragraphs.
+    $value = preg_replace('~[\r\n]+|<p[^>]*>([\s]|&nbsp;)*<\/p>~', '', $value);
+    // Remove trailing whitespace chars and fix html.
+    $value = rtrim(self::cleanHtml($value));
 
-    // For 'text', 'text_long', 'text_with_summary' everything
-    // is fine.
     return $value;
+  }
+
+  /**
+   * Clean html.
+   *
+   * @param string $html
+   *   Html string to clean.
+   *
+   * @return string
+   *   Cleaned html.
+   */
+  protected static function cleanHtml($html) {
+    $document = Html::load($html);
+    $xpath = new \DOMXPath($document);
+    // Remove empty html tags recursively.
+    while (($node_list = $xpath->query('//*[not(node())]')) && $node_list->length) {
+      foreach ($node_list as $node) {
+        $node->parentNode->removeChild($node);
+      }
+    }
+    return Html::serialize($document);
   }
 
 }
