@@ -19,6 +19,8 @@ paragraphs_paste_third_party:
           type: string
         regex:
           type: string
+        url:
+          type: string
     split_method_regex:
       type: string
       label: 'RegEx'

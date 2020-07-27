@@ -21,7 +21,7 @@
 
     // Get pasted data via clipboard API.
     clipboardData = event.clipboardData || window.clipboardData;
-    targetElement.value = JSON.stringify(clipboardData.getData('Text'));
+    targetElement.value = clipboardData.getData('Text');
 
     document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget + '"]').dispatchEvent(new Event('mousedown'));
 

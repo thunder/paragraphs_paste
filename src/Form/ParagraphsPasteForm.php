@@ -283,6 +283,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#options' => [
         'double_new_line' => t('By text double newline'),
         'regex' => t('By RegEx'),
+        'url' => t('By URL'),
       ],
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
@@ -337,6 +338,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   public static function buildRegExPattern(array $settings) {
     $parts = [];
 
+    if ($settings['split_method']['url']) {
+      $parts[] = "https?://[^\s/$.?#].[^\s]*";
+    }
     if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
       $parts[] = $settings['split_method_regex'];
     }
