@@ -5,7 +5,6 @@ namespace Drupal\paragraphs_paste\Form;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\SortArray;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\WidgetInterface;
@@ -38,26 +37,16 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   protected $pluginManager;
 
   /**
-   * Config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $config;
-
-  /**
    * Constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager service.
    * @param \Drupal\paragraphs_paste\ParagraphsPastePluginManager $pluginManager
    *   The ParagraphsPaste plugin manager.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Config factory service.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ParagraphsPastePluginManager $pluginManager, ConfigFactoryInterface $configFactory) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ParagraphsPastePluginManager $pluginManager) {
     $this->entityTypeManager = $entityTypeManager;
     $this->pluginManager = $pluginManager;
-    $this->config = $configFactory->get('paragraphs_paste.settings');
   }
 
   /**
@@ -67,7 +56,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.paragraphs_paste.plugin'),
-      $container->get('config.factory')
     );
   }
 
