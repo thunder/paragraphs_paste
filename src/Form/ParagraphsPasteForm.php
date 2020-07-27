@@ -88,7 +88,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     if ($settings['experimental']) {
       $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/html';
-   }
+    }
     else {
       $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/plain';
     }
