@@ -1,6 +1,12 @@
-init:
+plain:
   js:
     js/paragraphs-paste.js: {}
+  css:
+    theme:
+      css/paragraphs-paste.css: {}
+html:
+  js:
+    js/paragraphs-paste-experimental.js: {}
   css:
     theme:
       css/paragraphs-paste.css: {}

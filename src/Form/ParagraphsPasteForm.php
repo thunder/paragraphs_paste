@@ -85,7 +85,13 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $fieldWrapperId = Html::getId($fieldIdPrefix . '-add-more-wrapper');
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
-    $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/init';
+
+    if ($settings['experimental']) {
+      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/html';
+   }
+    else {
+      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/plain';
+    }
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
@@ -100,11 +106,15 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     ];
 
     $elements['paragraphs_paste']['paste']['content'] = [
-      '#type' => 'text_format',
+      '#type' => 'textarea',
       '#attributes' => [
         'class' => ['visually-hidden'],
       ],
     ];
+
+    if ($settings['experimental']) {
+      $elements['paragraphs_paste']['paste']['content']['#type'] = 'text_format';
+    }
 
     $elements['paragraphs_paste']['paste_action'] = [
       '#type' => 'submit',
@@ -132,20 +142,25 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $form_object = $form_state->getFormObject();
     $host = $form_object->getEntity();
 
-    // Get value from textarea.
+    $settings = $form_object->getFormDisplay($form_state)
+      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
+
     $pasted_data = NestedArray::getValue(
       $form_state->getUserInput(),
       array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
-    )['value'];
+    );
 
+    if ($settings['experimental']) {
+      // Get value from textarea.
+      $pasted_data = $pasted_data['value'];
+    }
+
+    // Reset value.
     NestedArray::setValue(
       $form_state->getUserInput(),
       array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content']),
       ''
     );
-
-    $settings = $form_object->getFormDisplay($form_state)
-      ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
     // Split by RegEx pattern.
     $pattern = self::buildRegExPattern($settings);
@@ -252,6 +267,13 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'property_path_mapping')[$definition['id']],
       ];
     }
+
+    $elements['experimental'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable HTML processing (experimental).'),
+      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'experimental'),
+    ];
 
     $elements['split_method'] = [
       '#type' => 'checkboxes',

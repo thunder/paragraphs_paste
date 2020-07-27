@@ -3,7 +3,7 @@
  * Paragraphs actions JS code for paragraphs actions button.
  */
 
-(function (Drupal) {
+(function (Drupal, CKEDITOR) {
 
   'use strict';
 
@@ -13,18 +13,18 @@
    * @param {event} event The event.
    */
   var pasteHandler = function (event, data) {
-    var clipboardData;
-    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content') + '"]');
+    event.currentTarget.classList.add('paragraphs-paste-action-focus');
+
+    var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
+    var editor = CKEDITOR.instances[targetElement.id];
+
+    editor.focus();
+    var editableElem = editor.editable().$;
+    // Reset editor contents.
+    editableElem.innerHTML = '';
 
     event.stopPropagation();
     event.preventDefault();
-
-    // Get pasted data via clipboard API.
-    clipboardData = event.clipboardData || window.clipboardData;
-    targetElement.value = JSON.stringify(clipboardData.getData('Text'));
-
-    document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget + '"]').dispatchEvent(new Event('mousedown'));
-
   };
 
   /**
@@ -64,16 +64,24 @@
 
         if (!wrapper.getAttribute('paragraphsPasteActionProcessed')) {
           var area = Drupal.theme('paragraphsPasteActionArea', {target: button.dataset.drupalSelector});
-          area.addEventListener('paste', pasteHandler);
-          area.addEventListener('mousedown', event => {
-            event.currentTarget.classList.add('paragraphs-paste-action-focus');
-          });
+          area.addEventListener('mousedown', pasteHandler);
           area.addEventListener('mouseleave', event => {
             event.currentTarget.classList.remove('paragraphs-paste-action-focus');
           });
 
           wrapper.prepend(area);
           wrapper.setAttribute('paragraphsPasteActionProcessed', true);
+
+          CKEDITOR.on("instanceReady", event => {
+            var editor = event.editor;
+            if (editor.element.$.dataset.drupalSelector === button.dataset.drupalSelector.replace(/action$/, 'content-value')) {
+              editor.config.pasteFromWordPromptCleanup = false;
+              editor.on('afterPaste', event => {
+                document.querySelector('[data-drupal-selector="' + event.editor.element.$.dataset.drupalSelector.replace('content-value', 'action') + '"]')
+                  .dispatchEvent(new Event('mousedown'));
+              });
+            }
+          });
         }
       });
     },
@@ -88,4 +96,4 @@
     }
   };
 
-})(Drupal);
+})(Drupal, CKEDITOR);
