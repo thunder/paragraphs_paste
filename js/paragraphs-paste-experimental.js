@@ -12,7 +12,7 @@
    *
    * @param {event} event The event.
    */
-  var pasteHandler = function (event, data) {
+  var pasteHandler = function (event) {
     event.currentTarget.classList.add('paragraphs-paste-action-focus');
 
     var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content-value') + '"]');
@@ -72,7 +72,7 @@
           wrapper.prepend(area);
           wrapper.setAttribute('paragraphsPasteActionProcessed', true);
 
-          CKEDITOR.on("instanceReady", event => {
+          CKEDITOR.on('instanceReady', event => {
             var editor = event.editor;
             if (editor.element.$.dataset.drupalSelector === button.dataset.drupalSelector.replace(/action$/, 'content-value')) {
               editor.config.pasteFromWordPromptCleanup = false;

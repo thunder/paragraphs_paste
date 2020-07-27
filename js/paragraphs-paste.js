@@ -12,7 +12,7 @@
    *
    * @param {event} event The event.
    */
-  var pasteHandler = function (event, data) {
+  var pasteHandler = function (event) {
     var clipboardData;
     var targetElement = document.querySelector('[data-drupal-selector="' + event.currentTarget.dataset.paragraphsPasteTarget.replace(/action$/, 'content') + '"]');
 
