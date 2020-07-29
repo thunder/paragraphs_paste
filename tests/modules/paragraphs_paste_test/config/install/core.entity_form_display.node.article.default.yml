@@ -33,17 +33,19 @@ content:
       default_paragraph_type: _none
       features:
         add_above: add_above
-        duplicate: '0'
         collapse_edit_all: '0'
+        duplicate: '0'
     third_party_settings:
       paragraphs_paste:
         enabled: true
         property_path_mapping:
           'oembed_url:video': 'paragraph.video.field_video:remote_video.field_media_oembed_video'
           text: paragraph.text.field_text
+        experimental: true
         split_method:
           double_new_line: double_new_line
           regex: '0'
+          url: '0'
         split_method_regex: ''
     region: content
   promote:

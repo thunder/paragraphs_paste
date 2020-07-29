@@ -4,6 +4,7 @@ namespace Drupal\Tests\paragraphs_paste\FunctionalJavascript;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\dblog\Controller\DbLogController;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\LoginAdminTrait;
@@ -34,6 +35,14 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * Content processing mode.
+   *
+   * @var bool
+   *   Use experimental mode.
+   */
+  protected $experimentalMode = FALSE;
+
+  /**
    * Simulate paste event.
    *
    * @param string $selector
@@ -42,7 +51,33 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    *   Text to copy.
    */
   public function simulatePasteEvent($selector, $text) {
-    $this->getSession()->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+    if ($this->experimentalMode) {
+      $this->getSession()
+        ->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+    }
+    else {
+      $this->getSession()->executeScript("var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+    }
+  }
+
+  /**
+   * Set content processing mode.
+   *
+   * @param bool $experimental_mode
+   *   Use experimental mode.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   In case of failures, an exception is thrown.
+   */
+  public function setPasteMethod($experimental_mode) {
+    $form_display_id = implode('.', ['node', 'article', 'default']);
+    $form_display = EntityFormDisplay::load($form_display_id);
+    $component = $form_display->getComponent('field_paragraphs');
+    $component['third_party_settings']['paragraphs_paste']['experimental'] = $experimental_mode;
+    $form_display->setComponent('field_paragraphs', $component);
+    $form_display->save();
+
+    $this->experimentalMode = $experimental_mode;
   }
 
   /**
