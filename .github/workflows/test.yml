@@ -55,7 +55,7 @@ jobs:
 
     - name: Test for deprecations
       run: test-drupal-project deprecation
-      if: ${{ matrix.DRUPAL_TESTING_DRUPAL_VERSION != '~9.0.0' }}
+      if: ${{ matrix.DRUPAL_TESTING_DRUPAL_VERSION != '~9.1.0' }}
 
     - name: Install drupal
       run: test-drupal-project install
@@ -64,6 +64,3 @@ jobs:
 
     - name: Start webserver and run the tests
       run: test-drupal-project
-      env:
-        THEME: ${{ matrix.THEME }}
-
