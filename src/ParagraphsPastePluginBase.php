@@ -166,7 +166,13 @@ abstract class ParagraphsPastePluginBase extends PluginBase implements Container
       /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $formDisplay */
       $formDisplay = $this->entityDisplayRepository->getFormDisplay($entity->getEntityTypeId(), $entity->bundle());
 
-      $save = $save || (!in_array($formDisplay->getComponent($fieldName)['type'], ['inline_entity_form_simple', 'inline_entity_form_complex']));
+      $save = $save || (!in_array(
+        $formDisplay->getComponent($fieldName)['type'],
+        [
+          'inline_entity_form_simple',
+          'inline_entity_form_complex',
+        ]
+      ));
 
       if (!empty($property_path)) {
         $this->setFieldValue($newEntity, $property_path, $value, $save);

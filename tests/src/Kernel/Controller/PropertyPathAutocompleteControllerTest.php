@@ -84,7 +84,10 @@ class PropertyPathAutocompleteControllerTest extends KernelTestBase {
   public function testHandleAutocomplete($input, $result) {
 
     $controller = PropertyPathAutocompleteController::create($this->container);
-    $response = $controller->handleAutocomplete(new Request(['q' => $input, 'allowed_field_types' => ['text_long']]));
+    $response = $controller->handleAutocomplete(new Request([
+      'q' => $input,
+      'allowed_field_types' => ['text_long'],
+    ]));
     $this->assertSame($result, $response->getContent());
   }
 

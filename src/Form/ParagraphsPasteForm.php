@@ -135,7 +135,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $pasted_data = NestedArray::getValue(
       $form_state->getUserInput(),
-      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
+      array_merge(array_slice(
+        $submit['button']['#parents'], 0, -1),
+        ['paste', 'content']
+      )
     );
 
     if ($settings['experimental']) {
@@ -146,7 +149,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Reset value.
     NestedArray::setValue(
       $form_state->getUserInput(),
-      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content']),
+      array_merge(array_slice(
+        $submit['button']['#parents'], 0, -1),
+        ['paste', 'content']
+      ),
       ''
     );
 
@@ -161,7 +167,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
         $paragraph_entity = $item->plugin->createParagraphEntity($item->value);
-        /* @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
+        /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
         $paragraph_entity->setParentEntity($host, $submit['field_name']);
         $submit['widget_state']['paragraphs'][] = [
           'entity' => $paragraph_entity,
