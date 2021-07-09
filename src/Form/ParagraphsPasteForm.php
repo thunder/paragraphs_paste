@@ -135,7 +135,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     $pasted_data = NestedArray::getValue(
       $form_state->getUserInput(),
-      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content'])
+      array_merge(array_slice(
+        $submit['button']['#parents'], 0, -1),
+        ['paste', 'content']
+      )
     );
 
     if ($settings['experimental']) {
@@ -146,7 +149,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     // Reset value.
     NestedArray::setValue(
       $form_state->getUserInput(),
-      array_merge(array_slice($submit['button']['#parents'], 0, -1), ['paste', 'content']),
+      array_merge(array_slice(
+        $submit['button']['#parents'], 0, -1),
+        ['paste', 'content']
+      ),
       ''
     );
 
@@ -161,7 +167,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     foreach ($items as $item) {
       if ($item->plugin instanceof ParagraphsPastePluginBase) {
         $paragraph_entity = $item->plugin->createParagraphEntity($item->value);
-        /* @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
+        /** @var \Drupal\paragraphs\Entity\Paragraph $paragraph_entity */
         $paragraph_entity->setParentEntity($host, $submit['field_name']);
         $submit['widget_state']['paragraphs'][] = [
           'entity' => $paragraph_entity,
@@ -247,12 +253,13 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.paragraphs_paste.plugin');
     foreach ($plugin_manager->getDefinitions() as $definition) {
+      $property_path_mapping = $plugin->getThirdPartySetting('paragraphs_paste', 'property_path_mapping');
       $elements['property_path_mapping'][$definition['id']] = [
         '#type' => 'textfield',
         '#title' => $definition['label'],
         '#autocomplete_route_name' => 'paragraphs_paste.autocomplete.property_path',
         '#autocomplete_route_parameters' => ['allowed_field_types' => $definition['allowed_field_types']],
-        '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'property_path_mapping')[$definition['id']],
+        '#default_value' => !empty($property_path_mapping[$definition['id']]) ? $property_path_mapping[$definition['id']] : '',
       ];
     }
 

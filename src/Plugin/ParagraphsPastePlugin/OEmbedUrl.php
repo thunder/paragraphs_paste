@@ -47,7 +47,7 @@ class OEmbedUrl extends ParagraphsPastePluginBase {
    * {@inheritdoc}
    */
   protected function formatInput($value, FieldDefinitionInterface $fieldDefinition) {
-    return strip_tags($value);;
+    return strip_tags($value);
   }
 
 }
