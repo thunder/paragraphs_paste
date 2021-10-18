@@ -276,11 +276,11 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#description' => t('Define when new paragraphs should be created.'),
       '#required' => TRUE,
       '#options' => [
-        'double_new_line' => t('By two empty lines'),
+        'double_empty_line' => t('By two empty lines'),
         'regex' => t('By RegEx'),
         'url' => t('By URL'),
       ],
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_empty_line']),
       '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
     ];
 
@@ -339,7 +339,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
       $parts[] = $settings['split_method_regex'];
     }
-    if ($settings['split_method']['double_new_line'] || empty($parts)) {
+    if ($settings['split_method']['double_empty_line'] || empty($parts)) {
       $parts[] = "(?:\r\n *|\n *){3,}";
     }
     return '~(' . implode('|', $parts) . ')~';

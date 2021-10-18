@@ -43,7 +43,7 @@ content:
           text: paragraph.text.field_text
         experimental: true
         split_method:
-          double_new_line: double_new_line
+          double_empty_line: double_empty_line
           regex: '0'
           url: '0'
         split_method_regex: ''
