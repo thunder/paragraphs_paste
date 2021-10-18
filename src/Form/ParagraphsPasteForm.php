@@ -276,7 +276,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#description' => t('Define when new paragraphs should be created.'),
       '#required' => TRUE,
       '#options' => [
-        'double_new_line' => t('By text double newline'),
+        'double_new_line' => t('By two empty lines'),
         'regex' => t('By RegEx'),
         'url' => t('By URL'),
       ],
@@ -340,7 +340,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       $parts[] = $settings['split_method_regex'];
     }
     if ($settings['split_method']['double_new_line'] || empty($parts)) {
-      $parts[] = "(?:\r\n *|\n *){2,}";
+      $parts[] = "(?:\r\n *|\n *){3,}";
     }
     return '~(' . implode('|', $parts) . ')~';
   }
