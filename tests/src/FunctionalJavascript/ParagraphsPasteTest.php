@@ -18,9 +18,9 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    *
    * @dataProvider providerTestPaste
    */
-  public function testPaste($processing_mode, $expected) {
+  public function testPaste($method, $processing_mode, $expected) {
     $content_type = 'article';
-    $this->setPasteMethod($processing_mode);
+    $this->setPasteMethod($method, $processing_mode);
     $session = $this->getSession();
     $page = $session->getPage();
     $driver = $session->getDriver();
@@ -43,9 +43,9 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    *
    * @dataProvider providerTestPaste
    */
-  public function testMultilineTextPaste($processing_mode, $expected) {
+  public function testMultilineTextPaste($method, $processing_mode, $expected) {
     $content_type = 'article';
-    $this->setPasteMethod($processing_mode);
+    $this->setPasteMethod($method, $processing_mode);
 
     $session = $this->getSession();
     $page = $session->getPage();
@@ -77,8 +77,8 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    *
    * @dataProvider providerTestPaste
    */
-  public function testPastingTwice($processing_mode, $expected) {
-    $this->testPaste($processing_mode, $expected);
+  public function testPastingTwice($method, $processing_mode, $expected) {
+    $this->testPaste($method, $processing_mode, $expected);
 
     $session = $this->getSession();
     $page = $session->getPage();
@@ -94,9 +94,9 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    *
    * @dataProvider providerTestPaste
    */
-  public function testPastingInTwoAreas($processing_mode, $expected) {
+  public function testPastingInTwoAreas($method, $processing_mode, $expected) {
     $content_type = 'article';
-    $this->setPasteMethod($processing_mode);
+    $this->setPasteMethod($method, $processing_mode);
 
     $session = $this->getSession();
     $page = $session->getPage();
@@ -152,9 +152,9 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    */
   public function providerTestPaste() {
     return [
-      'HTML' => ['html', '<p>%s</p>'],
-      'Plain' => ['plain', '%s'],
-      'Textile' => ['textile', '<p>%s</p>'],
+      'HTML' => ['text', 'html', '<p>%s</p>'],
+      'Plain' => ['text', 'plain', '%s'],
+      'Textile' => ['textile', 'plain', '<p>%s</p>'],
     ];
   }
 

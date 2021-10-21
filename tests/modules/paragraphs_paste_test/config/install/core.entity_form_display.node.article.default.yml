@@ -40,11 +40,11 @@ content:
         enabled: true
         property_path_mapping:
           'oembed_url:video': 'paragraph.video.field_video:remote_video.field_media_oembed_video'
-          textile: paragraph.text.field_text
+          textile: ''
           text: paragraph.text.field_text
-        processing: html
+        processing: plain
         custom_split_method_regex: ''
-        custom_split_method: 0
+        custom_split_method: false
     region: content
   promote:
     type: boolean_checkbox

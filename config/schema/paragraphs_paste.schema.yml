@@ -12,7 +12,7 @@ paragraphs_paste_third_party:
     processing:
       type: string
     custom_split_method:
-      type: integer
+      type: boolean
     custom_split_method_regex:
       type: string
 

@@ -23,6 +23,20 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
   /**
+   * The html processing mode.
+   *
+   * @var string
+   */
+  const PROCESSING_MODE_HTML = 'html';
+
+  /**
+   * The plain text processing mode.
+   *
+   * @var string
+   */
+  const PROCESSING_MODE_PLAINTEXT = 'plain';
+
+  /**
    * Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -94,7 +108,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       ],
     ];
 
-    if ($settings['processing'] === 'html') {
+    if ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       $elements['paragraphs_paste']['paste']['content']['#type'] = 'text_format';
     }
 
@@ -135,7 +149,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       )
     );
 
-    if ($settings['processing'] === 'html') {
+    if ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       // Get value from textarea.
       $pasted_data = $pasted_data['value'];
     }
@@ -263,8 +277,8 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#description' => t('Define how new paragraphs should be processed.'),
       '#required' => TRUE,
       '#options' => [
-        'plain' => t('Use plain text processing.'),
-        'html' => t('Use HTML processing (experimental).'),
+        static::PROCESSING_MODE_PLAINTEXT => t('Use plain text processing.'),
+        static::PROCESSING_MODE_HTML => t('Use HTML processing (experimental).'),
       ],
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'processing', 'plain'),
     ];
@@ -322,10 +336,10 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     if ($settings['custom_split_method'] && !empty($settings['custom_split_method_regex'])) {
       $parts[] = $settings['custom_split_method_regex'];
     }
-    elseif ($settings['processing'] === 'plain') {
+    elseif ($settings['processing'] === static::PROCESSING_MODE_PLAINTEXT) {
       $parts[] = "(?:\r\n *|\n *){3,}";
     }
-    elseif ($settings['processing'] === 'html') {
+    elseif ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       $parts[] = "(?:\r\n *|\n *){2,}";
     }
 
