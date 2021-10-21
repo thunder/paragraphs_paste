@@ -243,19 +243,23 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *   Returns 3rd party form elements.
    */
   public static function getThirdPartyForm(WidgetInterface $plugin, $field_name) {
-    $elements = [];
-
+    $elements = [
+      '#type' => 'fieldset',
+      '#title' => t('Paragraphs Paste'),
+    ];
     $elements['enabled'] = [
       '#type' => 'checkbox',
-      '#title' => t('Copy & Paste area'),
+      '#title' => t('Enable Copy & Paste area'),
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'enabled'),
     ];
+
+    $visibility_rule = [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]];
 
     $elements['property_path_mapping'] = [
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
       '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name} (Use arrow keys to navigate available options)'),
+      '#states' => ['visible' => $visibility_rule],
     ];
 
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
@@ -281,12 +285,14 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
         static::PROCESSING_MODE_HTML => t('Use HTML processing (experimental).'),
       ],
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'processing', 'plain'),
+      '#states' => ['visible' => $visibility_rule],
     ];
 
     $elements['custom_split_method'] = [
       '#type' => 'checkbox',
       '#title' => t('Use a custom regex for splitting content.'),
       '#default_value' => !empty($plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method')),
+      '#states' => ['visible' => $visibility_rule],
     ];
 
     $elements['custom_split_method_regex'] = [
@@ -294,7 +300,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       '#description' => t('Define when new paragraphs should be created.'),
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method_regex'),
       '#states' => [
-        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][custom_split_method]\"]" => ['checked' => TRUE]],
+        'visible' => $visibility_rule,
         'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][custom_split_method]\"]" => ['checked' => TRUE]],
       ],
       '#element_validate' => [[__CLASS__, 'validateRegEx']],
