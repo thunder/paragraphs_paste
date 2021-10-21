@@ -5,6 +5,7 @@ namespace Drupal\Tests\paragraphs_paste\FunctionalJavascript;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
 /**
  * Tests the creation of paragraphs by pasting random data.
@@ -59,7 +60,7 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
       'https://www.youtube.com/watch?v=3pX4iPEPA9A',
       'Picanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder.',
     ];
-    $text = implode(($processing_mode === 'html') ? '\n\n' : '\n\n\n', $text);
+    $text = implode(($processing_mode === ParagraphsPasteForm::PROCESSING_MODE_HTML) ? '\n\n' : '\n\n\n', $text);
     $this->drupalGet("node/add/$content_type");
     usleep(50000);
 
@@ -152,9 +153,15 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
    */
   public function providerTestPaste() {
     return [
-      'HTML' => ['text', 'html', '<p>%s</p>'],
-      'Plain' => ['text', 'plain', '%s'],
-      'Textile' => ['textile', 'plain', '<p>%s</p>'],
+      'HTML' => [
+        'text', ParagraphsPasteForm::PROCESSING_MODE_HTML, '<p>%s</p>',
+      ],
+      'Plain' => [
+        'text', ParagraphsPasteForm::PROCESSING_MODE_PLAINTEXT, '%s',
+      ],
+      'Textile' => [
+        'textile', ParagraphsPasteForm::PROCESSING_MODE_PLAINTEXT, '<p>%s</p>',
+      ],
     ];
   }
 

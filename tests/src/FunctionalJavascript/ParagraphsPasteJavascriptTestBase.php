@@ -8,6 +8,7 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\dblog\Controller\DbLogController;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\paragraphs\FunctionalJavascript\LoginAdminTrait;
+use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
 /**
  * Base class for Javascript tests for paragraphs_paste module.
@@ -40,7 +41,7 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    * @var string
    *   The processing mode.
    */
-  protected $processingMode = 'plain';
+  protected $processingMode = ParagraphsPasteForm::PROCESSING_MODE_PLAINTEXT;
 
   /**
    * Simulate paste event.
@@ -52,7 +53,7 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    */
   public function simulatePasteEvent($selector, $text) {
 
-    if ($this->processingMode === 'html') {
+    if ($this->processingMode === ParagraphsPasteForm::PROCESSING_MODE_HTML) {
       $this->getSession()
         ->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
     }

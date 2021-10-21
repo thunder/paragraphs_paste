@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\paragraphs_paste\FunctionalJavascript;
 
+use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
+
 /**
  * Tests the creation of paragraphs by pasting random data.
  *
@@ -14,7 +16,7 @@ class ParagraphsPasteTextileTest extends ParagraphsPasteJavascriptTestBase {
    */
   public function testTextileMarkup() {
     $content_type = 'article';
-    $this->setPasteMethod('textile');
+    $this->setPasteMethod('textile', ParagraphsPasteForm::PROCESSING_MODE_PLAINTEXT);
     $session = $this->getSession();
     $page = $session->getPage();
     $driver = $session->getDriver();
