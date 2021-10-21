@@ -37,10 +37,10 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
   /**
    * Content processing mode.
    *
-   * @var bool
-   *   Use experimental mode.
+   * @var string
+   *   The processing mode.
    */
-  protected $experimentalMode = FALSE;
+  protected $processingMode = 'plain';
 
   /**
    * Simulate paste event.
@@ -51,7 +51,8 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
    *   Text to copy.
    */
   public function simulatePasteEvent($selector, $text) {
-    if ($this->experimentalMode) {
+
+    if ($this->processingMode === 'html') {
       $this->getSession()
         ->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
     }
@@ -63,21 +64,31 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
   /**
    * Set content processing mode.
    *
-   * @param bool $experimental_mode
-   *   Use experimental mode.
+   * @param string $processing_mode
+   *   Processing mode to use.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    *   In case of failures, an exception is thrown.
    */
-  public function setPasteMethod($experimental_mode) {
+  public function setPasteMethod($processing_mode) {
     $form_display_id = implode('.', ['node', 'article', 'default']);
     $form_display = EntityFormDisplay::load($form_display_id);
     $component = $form_display->getComponent('field_paragraphs');
-    $component['third_party_settings']['paragraphs_paste']['experimental'] = $experimental_mode;
+
+    if ($processing_mode === 'textile') {
+      $component['third_party_settings']['paragraphs_paste']['property_path_mapping']['textile'] = 'paragraph.text.field_text';
+      $component['third_party_settings']['paragraphs_paste']['processing'] = 'plain';
+      $this->processingMode = 'plain';
+    }
+    else {
+      $component['third_party_settings']['paragraphs_paste']['property_path_mapping']['textile'] = '';
+      $component['third_party_settings']['paragraphs_paste']['property_path_mapping']['text'] = 'paragraph.text.field_text';
+      $component['third_party_settings']['paragraphs_paste']['processing'] = $processing_mode;
+      $this->processingMode = $processing_mode;
+    }
+
     $form_display->setComponent('field_paragraphs', $component);
     $form_display->save();
-
-    $this->experimentalMode = $experimental_mode;
   }
 
   /**

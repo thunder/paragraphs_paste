@@ -5,25 +5,16 @@ paragraphs_paste_third_party:
     enabled:
       type: boolean
       label: 'Copy & Paste area enabled'
-    experimental:
-      type: boolean
-      label: 'Enable HTML processing (experimental).'
     property_path_mapping:
       type: sequence
       sequence:
         type: string
-    split_method:
-      type: mapping
-      mapping:
-        double_empty_line:
-          type: string
-        regex:
-          type: string
-        url:
-          type: string
-    split_method_regex:
+    processing:
       type: string
-      label: 'RegEx'
+    custom_split_method:
+      type: integer
+    custom_split_method_regex:
+      type: string
 
 field.widget.third_party.paragraphs_paste:
   type: paragraphs_paste_third_party

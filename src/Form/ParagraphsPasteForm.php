@@ -73,13 +73,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $fieldWrapperId = Html::getId($fieldIdPrefix . '-add-more-wrapper');
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
-
-    if ($settings['experimental']) {
-      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/html';
-    }
-    else {
-      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/plain';
-    }
+    $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/' . $settings['processing'];
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
@@ -100,7 +94,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       ],
     ];
 
-    if ($settings['experimental']) {
+    if ($settings['processing'] === 'html') {
       $elements['paragraphs_paste']['paste']['content']['#type'] = 'text_format';
     }
 
@@ -141,7 +135,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       )
     );
 
-    if ($settings['experimental']) {
+    if ($settings['processing'] === 'html') {
       // Get value from textarea.
       $pasted_data = $pasted_data['value'];
     }
@@ -263,34 +257,31 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       ];
     }
 
-    $elements['experimental'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Enable HTML processing (experimental).'),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'experimental'),
-    ];
-
-    $elements['split_method'] = [
-      '#type' => 'checkboxes',
-      '#title' => t('Split methods'),
-      '#description' => t('Define when new paragraphs should be created.'),
+    $elements['processing'] = [
+      '#type' => 'radios',
+      '#title' => t('Processing method'),
+      '#description' => t('Define how new paragraphs should be processed.'),
       '#required' => TRUE,
       '#options' => [
-        'double_empty_line' => t('By two empty lines'),
-        'regex' => t('By RegEx'),
-        'url' => t('By URL'),
+        'plain' => t('Use plain text processing.'),
+        'html' => t('Use HTML processing (experimental).'),
       ],
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_empty_line']),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'processing', 'plain'),
     ];
 
-    $elements['split_method_regex'] = [
+    $elements['custom_split_method'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Use a custom regex for splitting content.'),
+      '#default_value' => !empty($plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method')),
+    ];
+
+    $elements['custom_split_method_regex'] = [
       '#type' => 'textfield',
-      '#title' => t('By RegEx'),
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method_regex'),
+      '#description' => t('Define when new paragraphs should be created.'),
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method_regex'),
       '#states' => [
-        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
-        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][custom_split_method]\"]" => ['checked' => TRUE]],
+        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][custom_split_method]\"]" => ['checked' => TRUE]],
       ],
       '#element_validate' => [[__CLASS__, 'validateRegEx']],
     ];
@@ -309,14 +300,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *   The complete form structure.
    */
   public static function validateRegEx(array &$element, FormStateInterface $form_state, array &$complete_form) {
-
-    $split_method_parents = $element['#parents'];
-    array_pop($split_method_parents);
-    $split_method_parents[] = 'split_method';
-
-    $split_methods = $form_state->getValue($split_method_parents);
+    $enabled = $form_state->getValue(array_merge(array_slice($element['#parents'], 0, -1), ['custom_split_method']));
     $regex = $form_state->getValue($element['#parents']);
-    if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
+    if ($enabled && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
   }
@@ -333,15 +319,16 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   public static function buildRegExPattern(array $settings) {
     $parts = [];
 
-    if ($settings['split_method']['url']) {
-      $parts[] = "https?://[^\s/$.?#].[^\s]*";
+    if ($settings['custom_split_method'] && !empty($settings['custom_split_method_regex'])) {
+      $parts[] = $settings['custom_split_method_regex'];
     }
-    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
-      $parts[] = $settings['split_method_regex'];
-    }
-    if ($settings['split_method']['double_empty_line'] || empty($parts)) {
+    elseif ($settings['processing'] === 'plain') {
       $parts[] = "(?:\r\n *|\n *){3,}";
     }
+    elseif ($settings['processing'] === 'html') {
+      $parts[] = "(?:\r\n *|\n *){2,}";
+    }
+
     return '~(' . implode('|', $parts) . ')~';
   }
 
