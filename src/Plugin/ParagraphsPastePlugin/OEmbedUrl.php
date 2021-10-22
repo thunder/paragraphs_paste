@@ -12,7 +12,7 @@ use Drupal\paragraphs_paste\ParagraphsPastePluginBase;
  *   id = "oembed_url",
  *   label = @Translation("OEmbed Urls"),
  *   module = "paragraphs_paste",
- *   weight = 0,
+ *   weight = 10,
  *   providers = {},
  *   deriver = "\Drupal\paragraphs_paste\Plugin\Derivative\OEmbedUrlDeriver",
  *   allowed_field_types = {"string"}

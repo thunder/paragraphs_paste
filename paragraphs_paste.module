@@ -53,3 +53,14 @@ function paragraphs_paste_field_widget_third_party_settings_form(WidgetInterface
 
   return $elements;
 }
+
+/**
+ * Implements hook_field_widget_settings_summary_alter().
+ */
+function paragraphs_paste_field_widget_settings_summary_alter(array &$summary, array $context) {
+  if ($context['widget'] instanceof ParagraphsWidget) {
+    if ($context['widget']->getThirdPartySetting('paragraphs_paste', 'enabled')) {
+      $summary[] = t('Paragraphs copy & paste: enabled');
+    }
+  }
+}

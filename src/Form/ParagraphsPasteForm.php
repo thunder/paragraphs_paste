@@ -23,6 +23,20 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
   /**
+   * The html processing mode.
+   *
+   * @var string
+   */
+  const PROCESSING_MODE_HTML = 'html';
+
+  /**
+   * The plain text processing mode.
+   *
+   * @var string
+   */
+  const PROCESSING_MODE_PLAINTEXT = 'plain';
+
+  /**
    * Entity type manager service.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -73,13 +87,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $fieldWrapperId = Html::getId($fieldIdPrefix . '-add-more-wrapper');
 
     $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
-
-    if ($settings['experimental']) {
-      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/html';
-    }
-    else {
-      $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/plain';
-    }
+    $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/' . $settings['processing'];
 
     // Move children to table header and remove $elements['paragraphs_paste'],
     // see paragraphs_preprocess_field_multiple_value_form().
@@ -100,7 +108,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       ],
     ];
 
-    if ($settings['experimental']) {
+    if ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       $elements['paragraphs_paste']['paste']['content']['#type'] = 'text_format';
     }
 
@@ -141,7 +149,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       )
     );
 
-    if ($settings['experimental']) {
+    if ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       // Get value from textarea.
       $pasted_data = $pasted_data['value'];
     }
@@ -235,19 +243,23 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *   Returns 3rd party form elements.
    */
   public static function getThirdPartyForm(WidgetInterface $plugin, $field_name) {
-    $elements = [];
-
+    $elements = [
+      '#type' => 'fieldset',
+      '#title' => t('Paragraphs Paste'),
+    ];
     $elements['enabled'] = [
       '#type' => 'checkbox',
-      '#title' => t('Copy & Paste area'),
+      '#title' => t('Enable Copy & Paste area'),
       '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'enabled'),
     ];
+
+    $visibility_rule = [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]];
 
     $elements['property_path_mapping'] = [
       '#type' => 'fieldset',
       '#title' => t('Copy & Paste mapping'),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
       '#description' => t('Specify a property path in the pattern of {entity_type}.{bundle}.{field_name} or {entity_type}.{bundle}.{entity_reference_field_name}:{referenced_entity_bundle}.{field_name} (Use arrow keys to navigate available options)'),
+      '#states' => ['visible' => $visibility_rule],
     ];
 
     /** @var \Drupal\paragraphs_paste\ParagraphsPastePluginManager $plugin_manager */
@@ -263,34 +275,33 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       ];
     }
 
-    $elements['experimental'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Enable HTML processing (experimental).'),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'experimental'),
-    ];
-
-    $elements['split_method'] = [
-      '#type' => 'checkboxes',
-      '#title' => t('Split methods'),
-      '#description' => t('Define when new paragraphs should be created.'),
+    $elements['processing'] = [
+      '#type' => 'radios',
+      '#title' => t('Processing method'),
+      '#description' => t('Define how new paragraphs should be processed.'),
       '#required' => TRUE,
       '#options' => [
-        'double_new_line' => t('By text double newline'),
-        'regex' => t('By RegEx'),
-        'url' => t('By URL'),
+        static::PROCESSING_MODE_PLAINTEXT => t('Use plain text processing.'),
+        static::PROCESSING_MODE_HTML => t('Use HTML processing (experimental).'),
       ],
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method', ['double_new_line']),
-      '#states' => ['visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][enabled]\"]" => ['checked' => TRUE]]],
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'processing', 'plain'),
+      '#states' => ['visible' => $visibility_rule],
     ];
 
-    $elements['split_method_regex'] = [
+    $elements['custom_split_method'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Use a custom regex for splitting content.'),
+      '#default_value' => !empty($plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method')),
+      '#states' => ['visible' => $visibility_rule],
+    ];
+
+    $elements['custom_split_method_regex'] = [
       '#type' => 'textfield',
-      '#title' => t('By RegEx'),
-      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'split_method_regex'),
+      '#description' => t('Define when new paragraphs should be created.'),
+      '#default_value' => $plugin->getThirdPartySetting('paragraphs_paste', 'custom_split_method_regex'),
       '#states' => [
-        'visible' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
-        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][split_method][regex]\"]" => ['checked' => TRUE]],
+        'visible' => $visibility_rule,
+        'required' => [":input[name=\"fields[$field_name][settings_edit_form][third_party_settings][paragraphs_paste][custom_split_method]\"]" => ['checked' => TRUE]],
       ],
       '#element_validate' => [[__CLASS__, 'validateRegEx']],
     ];
@@ -309,14 +320,9 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    *   The complete form structure.
    */
   public static function validateRegEx(array &$element, FormStateInterface $form_state, array &$complete_form) {
-
-    $split_method_parents = $element['#parents'];
-    array_pop($split_method_parents);
-    $split_method_parents[] = 'split_method';
-
-    $split_methods = $form_state->getValue($split_method_parents);
+    $enabled = $form_state->getValue(array_merge(array_slice($element['#parents'], 0, -1), ['custom_split_method']));
     $regex = $form_state->getValue($element['#parents']);
-    if (!empty($split_methods['regex']) && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
+    if ($enabled && (empty($regex) || preg_match("/$regex/", NULL) === FALSE)) {
       $form_state->setError($element, t('A RegEx needs to be defined or is invalid.'));
     }
   }
@@ -333,15 +339,16 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   public static function buildRegExPattern(array $settings) {
     $parts = [];
 
-    if ($settings['split_method']['url']) {
-      $parts[] = "https?://[^\s/$.?#].[^\s]*";
+    if ($settings['custom_split_method'] && !empty($settings['custom_split_method_regex'])) {
+      $parts[] = $settings['custom_split_method_regex'];
     }
-    if ($settings['split_method']['regex'] && !empty($settings['split_method_regex'])) {
-      $parts[] = $settings['split_method_regex'];
+    elseif ($settings['processing'] === static::PROCESSING_MODE_PLAINTEXT) {
+      $parts[] = "(?:\r\n *|\n *){3,}";
     }
-    if ($settings['split_method']['double_new_line'] || empty($parts)) {
+    elseif ($settings['processing'] === static::PROCESSING_MODE_HTML) {
       $parts[] = "(?:\r\n *|\n *){2,}";
     }
+
     return '~(' . implode('|', $parts) . ')~';
   }
 

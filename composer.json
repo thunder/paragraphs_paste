@@ -1,16 +1,22 @@
 {
-  "name": "drupal/paragraphs_paste",
-  "description": "Paragraphs paste provides a way to create multiple paragraph entities by pasting content.",
-  "type": "drupal-module",
-  "license": "GPL-2.0-or-later",
-  "authors": [
-    {
-      "name": "Volker Killesreiter",
-      "email": "volker.killesreiter@burda.com"
+    "name": "drupal/paragraphs_paste",
+    "description": "Paragraphs paste provides a way to create multiple paragraph entities by pasting content.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Volker Killesreiter",
+            "email": "volker.killesreiter@burda.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "drupal/paragraphs": "^1.10"
+    },
+    "require-dev": {
+        "netcarver/textile": "^3.7"
+    },
+    "suggest": {
+        "netcarver/textile": "Allows the usage of textile markup language when pasting text paragraphs."
     }
-  ],
-  "require": {
-    "ext-json": "*",
-    "drupal/paragraphs": "^1.10"
-  }
 }
