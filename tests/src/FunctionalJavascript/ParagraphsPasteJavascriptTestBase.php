@@ -7,7 +7,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\dblog\Controller\DbLogController;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\Tests\paragraphs\FunctionalJavascript\LoginAdminTrait;
 use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
 /**
