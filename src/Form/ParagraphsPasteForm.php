@@ -76,53 +76,40 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
   /**
    * Alter the entity form to add access unpublished elements.
    */
-  public function formAlter(&$elements, FormStateInterface $form_state, array $context) {
-
+  public function formAlter(array &$form, FormStateInterface $form_state, array $context) {
     $settings = $context['widget']->getThirdPartySettings('paragraphs_paste');
-    if (empty($settings['enabled']) || $form_state->isProgrammed()) {
-      return;
-    }
+
     // Construct wrapper id.
-    $fieldIdPrefix = implode('-', array_merge($context['form']['#parents'], [$elements['#field_name']]));
+    $fieldIdPrefix = implode('-', array_merge($form['widget']['#field_parents'], [$form['widget']['#field_name']]));
     $fieldWrapperId = Html::getId($fieldIdPrefix . '-add-more-wrapper');
 
-    $elements['paragraphs_paste']['#attributes']['data-paragraphs-paste'] = 'enabled';
-    $elements['paragraphs_paste']['#attached']['library'][] = 'paragraphs_paste/' . $settings['processing'];
-
-    // Move children to table header and remove $elements['paragraphs_paste'],
-    // see paragraphs_preprocess_field_multiple_value_form().
-    $elements['paragraphs_paste']['#paragraphs_paste'] = TRUE;
-
-    $elements['paragraphs_paste']['paste'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
+    $form['paragraphs_paste'] = [
+      '#type' => 'details',
+      '#title' => $this->T('Copy & Paste paragraphs'),
       '#attributes' => [
-        'class' => ['visually-hidden'],
+        'data-paragraphs-paste-target' => $fieldIdPrefix,
       ],
+      '#weight' => -1,
     ];
 
-    $elements['paragraphs_paste']['paste']['content'] = [
+    $form['paragraphs_paste'][$form['widget']['#field_name'] . '_paste_area'] = [
       '#type' => 'textarea',
+      '#resizable' => 'none',
       '#attributes' => [
-        'class' => ['visually-hidden'],
+        'class' => ['paragraphs-paste'],
       ],
     ];
 
     if ($settings['processing'] === static::PROCESSING_MODE_HTML) {
-      $elements['paragraphs_paste']['paste']['content']['#type'] = 'text_format';
+      $form['paragraphs_paste'][$form['widget']['#field_name'] . '_paste_area']['#type'] = 'text_format';
     }
-
-    $elements['paragraphs_paste']['paste_action'] = [
+    $form['paragraphs_paste'][$form['widget']['#field_name'] . '_paste_action'] = [
       '#type' => 'submit',
       '#name' => $fieldIdPrefix . '_paste_action',
-      '#value' => $this->t('Paste'),
+      '#value' => $this->t('Create paragraphs'),
       '#submit' => [[get_class($this), 'pasteSubmit']],
-      '#attributes' => [
-        'class' => ['visually-hidden'],
-        'data-paragraphs-paste' => 'enabled',
-      ],
       '#ajax' => [
-        'callback' => [ParagraphsWidget::class, 'addMoreAjax'],
+        'callback' => [get_class($this), 'addMoreAjax'],
         'wrapper' => $fieldWrapperId,
       ],
       '#limit_validation_errors' => [['paragraphs_paste']],
@@ -133,7 +120,7 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
    * Submit callback.
    */
   public static function pasteSubmit(array $form, FormStateInterface $form_state) {
-    $submit = ParagraphsWidget::getSubmitElementInfo($form, $form_state);
+    $submit = self::getSubmitElementInfo($form, $form_state);
     /** @var \Drupal\Core\Entity\ContentEntityForm $form_object */
     $form_object = $form_state->getFormObject();
     $host = $form_object->getEntity();
@@ -141,11 +128,13 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
     $settings = $form_object->getFormDisplay($form_state)
       ->getComponent($submit['field_name'])['third_party_settings']['paragraphs_paste'];
 
+    $input = &$form_state->getUserInput();
+
     $pasted_data = NestedArray::getValue(
-      $form_state->getUserInput(),
-      array_merge(array_slice(
-        $submit['button']['#parents'], 0, -1),
-        ['paste', 'content']
+      $input,
+      array_merge(
+        array_slice($submit['button']['#parents'], 0, -1),
+        [$submit['field_name'] . '_paste_area'],
       )
     );
 
@@ -153,16 +142,6 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
       // Get value from textarea.
       $pasted_data = $pasted_data['value'];
     }
-
-    // Reset value.
-    NestedArray::setValue(
-      $form_state->getUserInput(),
-      array_merge(array_slice(
-        $submit['button']['#parents'], 0, -1),
-        ['paste', 'content']
-      ),
-      ''
-    );
 
     // Split by RegEx pattern.
     $pattern = self::buildRegExPattern($settings);
@@ -189,6 +168,53 @@ class ParagraphsPasteForm implements ContainerInjectionInterface {
 
     ParagraphsWidget::setWidgetState($submit['parents'], $submit['field_name'], $form_state, $submit['widget_state']);
     $form_state->setRebuild();
+  }
+
+  /**
+   * Add more callback.
+   */
+  public static function addMoreAjax(array $form, FormStateInterface $form_state) {
+    /* @see ParagraphsWidget::getSubmitElementInfo() */
+    $submit = self::getSubmitElementInfo($form, $form_state);
+    $element = $submit['element'];
+
+    // Add a DIV around the delta receiving the Ajax effect.
+    $delta = $submit['element']['#max_delta'];
+    $element[$delta]['#prefix'] = '<div class="ajax-new-content">' . (isset($element[$delta]['#prefix']) ? $element[$delta]['#prefix'] : '');
+    $element[$delta]['#suffix'] = (isset($element[$delta]['#suffix']) ? $element[$delta]['#suffix'] : '') . '</div>';
+
+    // Clear the Add more delta.
+    NestedArray::setValue(
+      $element,
+      ['add_more', 'add_modal_form_area', 'add_more_delta', '#value'],
+      ''
+    );
+
+    return $element;
+  }
+
+  /**
+   * Get common submit element information for processing ajax submit handlers.
+   *
+   * @param array $form
+   *   Form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   Form state object.
+   *
+   * @return array
+   *   Submit element information.
+   */
+  public static function getSubmitElementInfo(array $form, FormStateInterface $form_state) {
+    /* @see ParagraphsWidget::getSubmitElementInfo() */
+    $submit['button'] = $form_state->getTriggeringElement();
+    $submit['element'] = NestedArray::getValue($form, array_merge(array_slice($submit['button']['#array_parents'], 0, -2), ['widget']));
+    $submit['field_name'] = $submit['element']['#field_name'];
+    $submit['parents'] = $submit['element']['#field_parents'];
+
+    // Get widget state.
+    $submit['widget_state'] = ParagraphsWidget::getWidgetState($submit['parents'], $submit['field_name'], $form_state);
+
+    return $submit;
   }
 
   /**

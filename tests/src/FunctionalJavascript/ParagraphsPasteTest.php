@@ -22,9 +22,6 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   public function testPaste($method, $processing_mode, $expected) {
     $content_type = 'article';
     $this->setPasteMethod($method, $processing_mode);
-    $session = $this->getSession();
-    $page = $session->getPage();
-    $driver = $session->getDriver();
 
     $this->loginAsAdmin();
 
@@ -32,11 +29,12 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     $text = 'Lorem ipsum dolor sit amet.';
     $this->drupalGet("node/add/$content_type");
     usleep(50000);
-    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
+    $this->assertTrue($this->getSession()->getDriver()->isVisible('//*[@data-paragraphs-paste-target="field_paragraphs"]'), 'Paragraphs Paste should be visible.');
 
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->simulatePasteEvent('field_paragraphs', $text);
+
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
-    $this->assertEquals(sprintf($expected, $text), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->assertEquals(sprintf($expected, $text), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
   }
 
   /**
@@ -47,11 +45,6 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   public function testMultilineTextPaste($method, $processing_mode, $expected) {
     $content_type = 'article';
     $this->setPasteMethod($method, $processing_mode);
-
-    $session = $this->getSession();
-    $page = $session->getPage();
-    $driver = $session->getDriver();
-
     $this->loginAsAdmin();
 
     // Check that paste functionality is working with default config.
@@ -64,13 +57,14 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
     $this->drupalGet("node/add/$content_type");
     usleep(50000);
 
-    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
-    $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
+    $this->getSession()->getDriver()->click('//*[@data-drupal-selector="edit-paragraphs-paste"]');
+    $this->assertTrue($this->getSession()->getDriver()->isVisible('//*[@data-paragraphs-paste-target="field_paragraphs"]'), 'Paragraphs Paste should be visible.');
 
-    $this->assertEquals(sprintf($expected, "Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola."), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
-    $this->assertEquals("Drupal Rap - Monster (remix) feat. A.Hughes and D.Stagg (1)", $page->find('xpath', '//input[@data-drupal-selector="edit-field-paragraphs-1-subform-field-video-0-target-id"]')->getValue(), 'Video should be connected to the paragraph subform.');
-    $this->assertEquals(sprintf($expected, "Picanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder."), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-2-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->simulatePasteEvent('field_paragraphs', $text);
+    $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
+    $this->assertEquals(sprintf($expected, "Spicy jalapeno bacon ipsum dolor amet short ribs ribeye chislic, turkey shank chuck cupim bacon bresaola."), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->assertEquals("Drupal Rap - Monster (remix) feat. A.Hughes and D.Stagg (1)", $this->getSession()->getPage()->find('xpath', '//input[@data-drupal-selector="edit-field-paragraphs-1-subform-field-video-0-target-id"]')->getValue(), 'Video should be connected to the paragraph subform.');
+    $this->assertEquals(sprintf($expected, "Picanha porchetta cupim, salami jerky alcatra doner strip steak pork loin short loin pork belly tail ham hock cow shoulder."), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-2-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
   }
 
   /**
@@ -81,13 +75,10 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   public function testPastingTwice($method, $processing_mode, $expected) {
     $this->testPaste($method, $processing_mode, $expected);
 
-    $session = $this->getSession();
-    $page = $session->getPage();
-
     $text = 'Bacon ipsum dolor amet cow picanha andouille strip steak tongue..';
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->simulatePasteEvent('field_paragraphs', $text);
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-1-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
-    $this->assertEquals(sprintf($expected, $text), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-1-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->assertEquals(sprintf($expected, $text), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-1-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
   }
 
   /**
@@ -98,10 +89,6 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
   public function testPastingInTwoAreas($method, $processing_mode, $expected) {
     $content_type = 'article';
     $this->setPasteMethod($method, $processing_mode);
-
-    $session = $this->getSession();
-    $page = $session->getPage();
-    $driver = $session->getDriver();
 
     $field_name = 'field_second_paragraphs';
     $field_storage = FieldStorageConfig::create([
@@ -131,18 +118,18 @@ class ParagraphsPasteTest extends ParagraphsPasteJavascriptTestBase {
 
     // Check that paste functionality is working with default config.
     $this->drupalGet("node/add/$content_type");
-    $this->assertTrue($driver->isVisible("//*[@data-paragraphs-paste-target='edit-field-paragraphs-paragraphs-paste-paste-action']"), 'Paragraphs Paste area should be visible.');
-    $this->assertTrue($driver->isVisible("//*[@data-paragraphs-paste-target='edit-field-second-paragraphs-paragraphs-paste-paste-action']"), 'Second Paragraphs Paste area should be visible.');
 
+    $this->assertTrue($this->getSession()->getDriver()->isVisible('//*[@data-paragraphs-paste-target="field_paragraphs"]'), 'Paragraphs Paste area should be visible.');
+    $this->assertTrue($this->getSession()->getDriver()->isVisible('//*[@data-paragraphs-paste-target="field_second_paragraphs"]'), 'Second Paragraphs Paste area should be visible.');
     $text = 'Lorem ipsum dolor sit amet.';
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->simulatePasteEvent('field_paragraphs', $text);
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
-    $this->assertEquals(sprintf($expected, $text), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->assertEquals(sprintf($expected, $text), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
 
     $text = 'Bacon ipsum dolor amet cow picanha andouille strip steak tongue..';
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-second-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->simulatePasteEvent('field_second_paragraphs', $text);
     $this->waitForElementPresent('[data-drupal-selector="edit-field-second-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in second paragraph form should be present.');
-    $this->assertEquals(sprintf($expected, $text), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-second-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into the second paragraph subform.');
+    $this->assertEquals(sprintf($expected, $text), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-second-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into the second paragraph subform.');
   }
 
   /**

@@ -17,9 +17,6 @@ class ParagraphsPasteTextileTest extends ParagraphsPasteJavascriptTestBase {
   public function testTextileMarkup() {
     $content_type = 'article';
     $this->setPasteMethod('textile', ParagraphsPasteForm::PROCESSING_MODE_PLAINTEXT);
-    $session = $this->getSession();
-    $page = $session->getPage();
-    $driver = $session->getDriver();
 
     $this->loginAsAdmin();
 
@@ -47,11 +44,12 @@ EOF;
 
     $this->drupalGet("node/add/$content_type");
     usleep(50000);
-    $this->assertTrue($driver->isVisible('//*[@data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]'), 'Paragraphs Paste area should be visible.');
+    $this->getSession()->getDriver()->click('//*[@data-drupal-selector="edit-paragraphs-paste"]');
+    $this->assertTrue($this->getSession()->getDriver()->isVisible('//*[@data-paragraphs-paste-target="field_paragraphs"]'), 'Paragraphs Paste area should be visible.');
 
-    $this->simulatePasteEvent('[data-paragraphs-paste-target="edit-field-paragraphs-paragraphs-paste-paste-action"]', $text);
+    $this->simulatePasteEvent('field_paragraphs', $text);
     $this->waitForElementPresent('[data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]', 10000, 'Text field in paragraph form should be present.');
-    $this->assertEquals(sprintf($expected, $text), $page->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
+    $this->assertEquals(sprintf($expected, $text), $this->getSession()->getPage()->find('xpath', '//textarea[@data-drupal-selector="edit-field-paragraphs-0-subform-field-text-0-value"]')->getValue(), 'Text should be pasted into paragraph subform.');
   }
 
 }

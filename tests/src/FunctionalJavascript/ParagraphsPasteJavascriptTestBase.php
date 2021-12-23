@@ -7,7 +7,6 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\dblog\Controller\DbLogController;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\Tests\paragraphs\FunctionalJavascript\LoginAdminTrait;
 use Drupal\paragraphs_paste\Form\ParagraphsPasteForm;
 
 /**
@@ -46,19 +45,26 @@ abstract class ParagraphsPasteJavascriptTestBase extends WebDriverTestBase {
   /**
    * Simulate paste event.
    *
-   * @param string $selector
-   *   The CSS selector.
+   * @param string $field_name
+   *   The original field name.
    * @param string $text
    *   Text to copy.
    */
-  public function simulatePasteEvent($selector, $text) {
+  public function simulatePasteEvent($field_name, $text) {
+
+    $selector = "[data-paragraphs-paste-target=\"{$field_name}\"]";
+    if ($this->getSession()->evaluateScript("document.querySelector('{$selector}').open === false;")) {
+      $this->click($selector);
+    }
 
     if ($this->processingMode === ParagraphsPasteForm::PROCESSING_MODE_HTML) {
-      $this->getSession()
-        ->executeScript("document.querySelector('{$selector}').dispatchEvent(new MouseEvent('mousedown')); var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.activeElement.contentDocument.querySelector('.cke_editable').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+      $this->getSession()->executeScript("var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); var cke = CKEDITOR.instances['edit-" . strtr($field_name, '_', '-') . "-paste-area-value']; cke.focus(); cke.editable().$.innerHTML = ''; cke.editable().$.dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}))");
+      $this->click("[data-drupal-selector=\"edit-" . strtr($field_name, '_', '-') . "-paste-action\"]");
     }
     else {
-      $this->getSession()->executeScript("var pasteData = new DataTransfer(); pasteData.setData('text/plain', '{$text}'); document.querySelector('{$selector}').dispatchEvent(new ClipboardEvent('paste', {clipboardData: pasteData}));");
+      $area_selector = "[data-drupal-selector=\"edit-" . strtr($field_name, '_', '-') . "-paste-area\"]";
+      $this->getSession()->executeScript("document.querySelector('{$area_selector}').value = '{$text}';");
+      $this->click("[data-drupal-selector=\"edit-" . strtr($field_name, '_', '-') . "-paste-action\"]");
     }
   }
 
